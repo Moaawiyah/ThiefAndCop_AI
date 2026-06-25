@@ -1,0 +1,32 @@
+# ngrok configuration — Approach 2 (assignment §7.2).
+#
+# Securely exposes the LOCAL Ollama daemon (127.0.0.1:11434) over HTTPS with a
+# Traffic Policy that requires Basic Auth, so only requests carrying the right
+# Authorization header reach Ollama. Ollama itself stays bound to loopback.
+#
+# Usage:
+#   ngrok start --config deploy/ngrok.yaml ollama
+# Then set in config.yaml:
+#   ollama.base_url: https://<your-subdomain>.ngrok-free.app
+#   ollama.auth_header: "Basic <base64(user:pass)>"
+#   ollama.enabled: true
+
+version: 3
+agent:
+  # authtoken: <paste your ngrok authtoken here, or set NGROK_AUTHTOKEN env var>
+
+endpoints:
+  - name: ollama
+    url: # optional reserved domain, e.g. https://my-ollama.ngrok-free.app
+    upstream:
+      url: 11434           # local Ollama port (127.0.0.1:11434)
+    traffic_policy:
+      inline:
+        on_http_request:
+          # Reject any request without valid Basic Auth credentials.
+          - actions:
+              - type: basic-auth
+                config:
+                  realm: ollama
+                  credentials:
+                    - "uoh:change-me-strong-password"

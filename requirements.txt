@@ -1,0 +1,27 @@
+# HW6 — Cop & Thief MCP pursuit. Python dependencies.
+# Core game / data / plotting
+numpy>=1.26
+matplotlib>=3.8
+PyYAML>=6.0
+
+# MCP servers + client (two FastMCP servers, one orchestrator client)
+fastmcp>=2.0
+mcp>=1.0
+
+# Natural-language layer (local Ollama, Approach 2). Optional at runtime:
+# the NL layer degrades gracefully if Ollama is absent.
+ollama>=0.3
+
+# Pygame GUI (optional / headless-safe)
+pygame>=2.6
+
+# Gmail JSON reporting via OAuth (only needed for actually sending email)
+google-api-python-client>=2.0
+google-auth-oauthlib>=1.0
+google-auth>=2.0
+
+# Cloud deployment (Phase 7 — optional; not exercised in the local pipeline)
+prefect>=3.0
+
+# Testing
+pytest>=8.0

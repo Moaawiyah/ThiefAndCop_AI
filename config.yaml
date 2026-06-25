@@ -1,0 +1,62 @@
+# HW6 — Cop & Thief MCP pursuit. Central configuration (no hardcoding allowed, §10).
+
+# --- Game parameters (Table 3) ---
+grid_size: [5, 5]        # [rows, cols] of the 2D grid
+max_moves: 25            # max moves per sub-game (משחקון)
+num_games: 6             # sub-games per full game series (משחק)
+max_barriers: 5          # max barriers the cop may place per sub-game
+
+scoring:
+  cop_win: 20            # cop captures the thief
+  thief_win: 10          # thief survives max_moves
+  cop_loss: 5            # cop's points when the thief escapes
+  thief_loss: 5          # thief's points when caught
+
+# --- Partial observability (§4.5 / §5.1) ---
+vision_radius: 2         # Chebyshev radius each agent can "see"
+
+# --- Movement ---
+allow_diagonal: true     # 8-directional movement incl. diagonals
+
+# --- Start positions: "random" or explicit [row, col] ---
+start:
+  cop: random
+  thief: random
+  min_initial_distance: 3  # keep agents apart at start (> vision_radius for stage 3/4 sanity)
+
+# --- LLM backend (Approach 2: local Ollama, optionally tunneled) ---
+ollama:
+  model: llama3.1
+  base_url: http://127.0.0.1:11434
+  auth_header: ""         # set when accessed through an authenticated tunnel
+  enabled: false          # Phase 5 toggles NL layer on; heuristic/Q play works without it
+
+# --- MCP servers (two separate servers, §5) ---
+mcp:
+  cop:
+    host: 127.0.0.1
+    port: 8101
+  thief:
+    host: 127.0.0.1
+    port: 8102
+  auth_token: "change-me-dev-token"  # token-based auth (§6)
+
+# --- Q-Learning hyper-parameters (§8.2) ---
+qlearning:
+  learning_rate: 0.1
+  discount_factor: 0.9
+  epsilon_start: 1.0
+  epsilon_min: 0.05
+  epsilon_decay: 0.9995
+  episodes: 20000
+  q_dir: artifacts        # where q_cop.npy / q_thief.npy / curves are written
+
+# --- Reporting (§9) ---
+report:
+  email_target: moaawiyah.haj@icloud.com
+  timezone: Asia/Jerusalem
+  group_name: "Team-Name"
+  students: []
+  github_repo: ""
+  cop_mcp_url: ""
+  thief_mcp_url: ""

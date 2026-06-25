@@ -1,0 +1,32 @@
+
+--- Sub-game 1 (start cop=(0, 3) thief=(4, 2)) ---
+  [ 1] THIEF says: "I'm keeping a low profile, watching my back. Any tips on evading the COP." -> {'type': 'move', 'action': 'W'}
+       COP   says: "Stay alert and observe your surroundings carefully. Predicting my moves can be tricky; focus on sudden shifts in patterns or unexpected signals from other players as potential cues for evasive maneuvers." -> {'type': 'move', 'action': 'SW'}
+  [ 2] THIEF says: "I'll keep a sharp eye out for any unusual patterns or signals that might hint at your next move. Staying unpredictable is key, and I won't let my guard down." -> {'type': 'move', 'action': 'W'}
+       COP   says: "I am vigilant, watching every shadow and corner closely. Patience is my ally as I await the moment to pounce." -> {'type': 'move', 'action': 'S'}
+  [ 3] THIEF says: "Staying stealthy and moving cautiously, I'll keep a wide berth from any obvious trails. Every step feels like a dance to avoid the watchful eye." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "Evasive moves are key, but remember, I'm closing in on your position just southwest from me. Stay alert; I'm getting warmer." -> {'type': 'move', 'action': 'W'}
+  [ 4] THIEF says: "I hear you closing in, COP. Don't think I'll make it easy for you to catch me though; I'm as elusive as a ghost in broad daylight." -> {'type': 'move', 'action': 'E'}
+       COP   says: "Elusive indeed, but remember, a skilled hunter always matches wits with the wiliest of foxes. You might find my presence closer than your shadow." -> {'type': 'move', 'action': 'S'}
+  [ 5] THIEF says: "You talk big, COP, but I'll show you that I can dance just as well on this grid as I can plan my moves. Watching closely, yet always staying one step ahead." -> {'type': 'move', 'action': 'NW'}
+       COP   says: "We'll see how long your feet carry you before my steady pursuit catches you. You dance well, but I'm ready to outlast the longest lead." -> {'type': 'move', 'action': 'W'}
+       >> capture! cop landed on thief at (3, 0)
+
+--- Sub-game 2 (start cop=(4, 3) thief=(0, 1)) ---
+  [ 1] THIEF says: "Skeptical you'll outlast this chase, huh. We'll see who tires first in this game of cat and mouse." -> {'type': 'move', 'action': 'W'}
+       COP   says: "Stay alert; I'm closing in on your position whether you're hiding or running. There's no escape from my pursuit—time to test how long you can keep up this evasion game." -> {'type': 'move', 'action': 'NW'}
+  [ 2] THIEF says: "Sensing your approach, I'll weave through the shadows, staying one step ahead. This dance of avoidance has just begun, and we're far from sealing my fate." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "You dance well in the shadows, but remember, a skilled hunter also thrives in the moment's silence before their prey is cornered. Observe your moves closely; I am ever narrowing my focus." -> {'type': 'move', 'action': 'N'}
+  [ 3] THIEF says: "You speak of moments that haven't come yet, COP. In this ever-moving game, it's wise to keep every second in mind as a potential corner." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "Patience is my strength here; I'll keep you within sight, narrowing down your space with each move. Stay alert, every moment holds its strategy." -> {'type': 'move', 'action': 'W'}
+  [ 4] THIEF says: "Staying wary of your gaze, every step feels like a dance around the unseen. You think you corner me, but I know how to slip through your net of sights." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "Evasive as always, THIEF. Keep in mind, a well-trained COP never quits closing in." -> {'type': 'move', 'action': 'NW'}
+  [ 5] THIEF says: "Aware of your approach, COP, but I'm staying quick and nimble. You'll have to be faster to catch a shadow like mine." -> {'type': 'move', 'action': 'SE'}
+       COP   says: "Evasive maneuvers are expected, but you can't forever evade what is inevitable. I will narrow this space and make it clear - evasion cannot last as I hone in on your position." -> {'type': 'move', 'action': 'E'}
+       >> capture! cop landed on thief at (1, 1)
+
+===== SERIES COMPLETE =====
+  sub-game 1: winner=cop   moves=5  cop=20 thief=5
+  sub-game 2: winner=cop   moves=5  cop=20 thief=5
+  TOTALS -> cop=40 thief=10
+  LLM (Ollama) active: True
