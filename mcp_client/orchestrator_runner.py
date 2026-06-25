@@ -18,7 +18,7 @@ from typing import List
 from core.engine import GameEngine
 from core.observation import Observation
 from agents.policy import build_policy
-from llm.ollama_client import OllamaClient
+from llm.glm_client import LLMClient
 from mcp_client.bus import ToolBus
 
 
@@ -30,7 +30,7 @@ class Orchestrator:
         self.bus = bus
         self.token = config.mcp.auth_token
         self.verbose = verbose
-        self.llm = OllamaClient(config.ollama)
+        self.llm = LLMClient(config.llm)
         # Policies (Q-table if trained, else heuristic) — owned by the client.
         self.cop_policy = build_policy("cop", config)
         self.thief_policy = build_policy("thief", config)
@@ -171,5 +171,5 @@ class Orchestrator:
             self.log(f"  sub-game {r['sub_game']}: winner={r['winner']:<5} "
                      f"moves={r['moves']:<2} cop={r['cop_score']} thief={r['thief_score']}")
         self.log(f"  TOTALS -> cop={totals['cop']} thief={totals['thief']}")
-        self.log(f"  LLM (Ollama) active: {self.llm.available}")
+        self.log(f"  LLM (GLM) active: {self.llm.available}")
         return {"results": results, "totals": totals, "llm_active": self.llm.available}

@@ -1,29 +1,36 @@
-"""Ollama LLM client for the NL layer (Approach 2, assignment §7.2).
+"""GLM LLM client for the NL layer (Approach 1, assignment §7.1).
 
-Talks to a local Ollama daemon (``http://127.0.0.1:11434`` by default) or a
-remote one exposed via an authenticated ngrok tunnel (``auth_header`` set).
+Talks to the Zhipu GLM public-cloud API (OpenAI-compatible) at
+``https://api.z.ai/api/paas/v4``. The API key is read from
+``config.llm.api_key`` or, when that is empty, from the ``GLM_API_KEY``
+environment variable (preferred — keep secrets out of the committed config).
 
-CRITICAL: the whole NL layer degrades gracefully. If ``ollama.enabled`` is False,
-the daemon is unreachable, or the model is not pulled, every method returns a
-deterministic *template* fallback so the game still runs end-to-end on the
-Q-Learning / heuristic policy alone. Missing Ollama must never break the game.
+CRITICAL: the whole NL layer degrades gracefully. If ``llm.enabled`` is False,
+no API key is configured, the network is unreachable, or the ``openai`` package
+is missing, every method returns a deterministic *template* fallback so the game
+still runs end-to-end on the Q-Learning / heuristic policy alone. Missing GLM
+must never break the game.
 """
 
 from __future__ import annotations
 
+import os
 from typing import Optional
 
-from core.config import OllamaConfig
+from core.config import LLMConfig
 from core.observation import Observation
 from . import prompts
 
-try:  # ollama python client is optional at runtime
-    import ollama as _ollama
-    _OLLAMA_IMPORT_OK = True
+try:  # openai python client is optional at runtime (GLM is OpenAI-compatible)
+    from openai import OpenAI as _OpenAI
+    _OPENAI_IMPORT_OK = True
 except Exception:  # pragma: no cover - import guard
-    _ollama = None
-    _OLLAMA_IMPORT_OK = False
+    _OpenAI = None
+    _OPENAI_IMPORT_OK = False
 
+
+# Environment variable holding the GLM API key (preferred over config).
+GLM_ENV_KEY = "GLM_API_KEY"
 
 # Coarse direction words used for template fallbacks and belief parsing.
 _DIRECTIONS = {
@@ -33,44 +40,50 @@ _DIRECTIONS = {
 }
 
 
-class OllamaClient:
-    """Thin, fault-tolerant wrapper around the Ollama chat API."""
+class LLMClient:
+    """Thin, fault-tolerant wrapper around the GLM chat-completions API."""
 
-    def __init__(self, config: OllamaConfig):
+    def __init__(self, config: LLMConfig):
         self.config = config
         self.available = False
         self._client = None
-        if config.enabled and _OLLAMA_IMPORT_OK:
+        if config.enabled and _OPENAI_IMPORT_OK:
             self._try_connect()
 
     # ----- connection ------------------------------------------------------
+    def _resolve_key(self) -> str:
+        """Config key takes precedence; fall back to the GLM_API_KEY env var."""
+        return self.config.api_key or os.environ.get(GLM_ENV_KEY, "")
+
     def _try_connect(self) -> None:
+        key = self._resolve_key()
+        if not key:
+            self.available = False
+            self._client = None
+            return
         try:
-            headers = {}
-            if self.config.auth_header:
-                headers["Authorization"] = self.config.auth_header
-            self._client = _ollama.Client(host=self.config.base_url, headers=headers or None)
-            # Probe: list models. If the daemon is down this raises.
-            self._client.list()
+            self._client = _OpenAI(api_key=key, base_url=self.config.base_url)
             self.available = True
         except Exception:
             self.available = False
             self._client = None
 
     # ----- core chat -------------------------------------------------------
-    def _chat(self, system: str, user: str, max_tokens: int = 80) -> Optional[str]:
+    def _chat(self, system: str, user: str, max_tokens: int = 120) -> Optional[str]:
         if not self.available or self._client is None:
             return None
         try:
-            resp = self._client.chat(
+            resp = self._client.chat.completions.create(
                 model=self.config.model,
                 messages=[
                     {"role": "system", "content": system},
                     {"role": "user", "content": user},
                 ],
-                options={"num_predict": max_tokens, "temperature": 0.8},
+                max_tokens=max_tokens,
+                temperature=0.8,
+                extra_body={"thinking": {"type": "disabled"}},
             )
-            return (resp.get("message", {}) or {}).get("content", "").strip()
+            return (resp.choices[0].message.content or "").strip()
         except Exception:
             # Any runtime failure -> mark unavailable so callers use fallbacks.
             self.available = False
@@ -92,7 +105,7 @@ class OllamaClient:
         out = self._chat(
             prompts.system_prompt(obs.agent),
             prompts.belief_prompt(obs, opponent_message),
-            max_tokens=8,
+            max_tokens=16,
         )
         if out:
             word = out.strip().lower().split()[0].strip(".,!?")

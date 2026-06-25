@@ -81,7 +81,7 @@ hw6/
     train.py               # self-play training -> q_*.npy + learning curve CSV/PNG
     policy.py              # Q-policy with last-known-opponent belief tracking
   llm/
-    ollama_client.py       # fault-tolerant Ollama client (graceful degradation)
+    glm_client.py          # fault-tolerant GLM cloud client (graceful degradation)
     prompts.py             # NL system/turn prompts (generate + parse)
   mcp_servers/
     tools.py               # shared tool impls (the game logic behind the tools)
@@ -94,7 +94,7 @@ hw6/
     report_schema.py       # Internal Game JSON (§9.1) + Bonus JSON (§9.2)
     email_report.py        # Gmail API (OAuth) sender; dry-run by default
   deploy/
-    ngrok.yaml             # secure Ollama tunnel (Approach 2, §7.2)
+    ngrok.yaml             # optional legacy scaffold: secure local-LLM tunnel (§7.2)
     prefect_flow.py        # Prefect Cloud deployment scaffold (Phase 7, optional)
   tests/                   # pytest: grid, engine, qlearning, report schema
   scripts/sanity_check.py  # staged 2x2 -> 5x5 runs (§4.5)
@@ -139,7 +139,7 @@ The single most important rule (§5.2): **the LLM is NOT inside the MCP server.*
 ```
                 +------------------- orchestrator.py (MCP CLIENT) -------------------+
                 |  owns: dialogue logic, belief tracking, Q/heuristic policies,      |
-                |        and the Ollama LLM (llm/ollama_client.py)                   |
+                |        and the GLM LLM (llm/glm_client.py)                    |
                 +---------------------------+---------------------------------------+
                           | tool calls (HTTP / in-process)        | tool calls
                           v                                        v
@@ -182,7 +182,7 @@ The single most important rule (§5.2): **the LLM is NOT inside the MCP server.*
   location-confirmation tool: an agent can assert where it believes it is and the
   authoritative server confirms/denies, decoupling bookkeeping errors from the NL
   layer.
-* **Graceful degradation.** If Ollama is disabled/unreachable, the client falls
+* **Graceful degradation.** If GLM is disabled/unreachable, the client falls
   back to deterministic NL *templates* (still free text, never coordinates) and a
   keyword direction parser, so the full pipeline runs with zero LLM dependency.
 
@@ -227,7 +227,7 @@ the latest NL messages from each agent. Generated headlessly with
 `python3 gui/visualizer.py --headless`.
 
 ### 6.3 CLI logs — real natural-language dialogue
-`artifacts/nl_dialogue_log.txt` — a full series run with the **live Ollama LLM**
+`artifacts/nl_dialogue_log.txt` — a full series run with the **live GLM LLM**
 enabled. Excerpt:
 
 ```
@@ -247,11 +247,12 @@ assignment asks for.
 
 Not exercised by the local pipeline, but scaffolded:
 
-* `deploy/ngrok.yaml` — exposes the **local** Ollama (`127.0.0.1:11434`) over
-  HTTPS behind an ngrok **Traffic Policy** that enforces **Basic Auth**, so only
-  requests with the right `Authorization` header reach the model (§7.2). Set
-  `ollama.base_url` / `ollama.auth_header` / `ollama.enabled` in `config.yaml` to
-  use it.
+* `deploy/ngrok.yaml` — OPTIONAL legacy scaffold: exposes a **local** LLM
+  (`127.0.0.1:11434`) over HTTPS behind an ngrok **Traffic Policy** that enforces
+  **Basic Auth**, so only requests with the right `Authorization` header reach the
+  model (§7.2). The default backend is the public GLM cloud API (Approach 1), which
+  needs no tunnel. Set `llm.base_url` / `llm.api_key` / `llm.enabled` in
+  `config.yaml` to use the tunnelled local path.
 * `deploy/prefect_flow.py` — a Prefect flow wrapping each MCP server as a managed
   process with a public URL; access stays **token-gated** (rotate
   `config.mcp.auth_token` to revoke).
@@ -285,7 +286,7 @@ first run. `reporting/report_schema.py` also builds the **Inter-Group Bonus JSON
 
 Every game parameter lives in `config.yaml`: `grid_size`, `max_moves`,
 `num_games`, `max_barriers`, the full `scoring` table, `vision_radius`,
-`allow_diagonal`, start rules, Ollama backend, MCP host/port/token, Q-Learning
+`allow_diagonal`, start rules, GLM backend, MCP host/port/token, Q-Learning
 hyper-parameters, and report metadata. `core/config.py` validates these into typed
 dataclasses; the rest of the code never hard-codes a game constant.
 

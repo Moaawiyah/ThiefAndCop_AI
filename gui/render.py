@@ -96,7 +96,7 @@ class BoardRenderer:
              f"cop {info['totals']['cop']}  thief {info['totals']['thief']}"),
             (self.font, COLORS["cop"], f"COP:   {info['cop_msg'][:70]}"),
             (self.font, COLORS["thief"], f"THIEF: {info['thief_msg'][:70]}"),
-            (self.font, COLORS["dim"], f"LLM(Ollama): {llm}   {info['status_text']}"),
+            (self.font, COLORS["dim"], f"LLM(GLM): {llm}   {info['status_text']}"),
         ]
         for i, (font, color, text) in enumerate(lines):
             self.screen.blit(font.render(text, True, color), (MARGIN, py + 10 + i * 30))

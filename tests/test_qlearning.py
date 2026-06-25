@@ -1,8 +1,13 @@
 """Tests for the Q-Learning table: Bellman math, encoding, convergence."""
 
+import random
+
 import numpy as np
 
 from agents.qlearning import QTable, action_set
+from agents.train_utils import legal_mask
+from core.config import load_config
+from core.engine import GameEngine
 
 
 def test_action_sets():
@@ -69,6 +74,24 @@ def test_greedy_respects_legal_mask():
     mask[0] = False
     a = q.greedy_action_index(state, mask)
     assert a != 0
+
+
+def test_legal_mask_excludes_barrier_on_already_barricaded_cell():
+    """A cop camped on a cell it already barricaded must not see 'barrier' as
+    legal again, even with barriers_left > 0 — otherwise greedy selection gets
+    stuck replaying a no-op action for the rest of the sub-game (regression)."""
+    cfg = load_config()
+    cfg.validate()
+    eng = GameEngine(cfg, rng=random.Random(0))
+    eng.reset_sub_game()
+    eng.state.cop = (2, 2)
+    eng.apply_cop_action({"type": "barrier"})
+    assert eng.grid.is_barrier((2, 2))
+
+    q = QTable("cop", num_cells=cfg.num_cells, allow_diagonal=cfg.allow_diagonal)
+    mask = legal_mask(q, eng, eng.state.cop, barriers_left=cfg.max_barriers - 1)
+    barrier_idx = q.actions.index("barrier")
+    assert not mask[barrier_idx]
 
 
 def test_converges_on_tiny_corridor():

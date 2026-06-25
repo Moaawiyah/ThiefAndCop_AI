@@ -5,7 +5,7 @@ This module loads that file into a small set of validated dataclasses so the res
 of the codebase can rely on typed access instead of dict look-ups.
 
 The schema dataclasses live in :mod:`core.config_schema` and are re-exported here
-so existing imports (``from core.config import Config, OllamaConfig`` ...) keep
+so existing imports (``from core.config import Config, LLMConfig`` ...) keep
 working unchanged.
 """
 
@@ -18,9 +18,9 @@ import yaml
 
 from .config_schema import (  # noqa: F401  (re-exported for callers/tests)
     Config,
+    LLMConfig,
     MCPConfig,
     MCPEndpoint,
-    OllamaConfig,
     QLearningConfig,
     ReportConfig,
     Scoring,
@@ -56,7 +56,7 @@ def load_config(path: Optional[str] = None) -> Config:
     grid = raw.get("grid_size", [5, 5])
     scoring_raw = raw.get("scoring", {}) or {}
     start_raw = raw.get("start", {}) or {}
-    ollama_raw = raw.get("ollama", {}) or {}
+    llm_raw = raw.get("llm", {}) or {}
     mcp_raw = raw.get("mcp", {}) or {}
     ql_raw = raw.get("qlearning", {}) or {}
     report_raw = raw.get("report", {}) or {}
@@ -82,11 +82,11 @@ def load_config(path: Optional[str] = None) -> Config:
             thief=_coerce_pos(start_raw.get("thief", "random")),
             min_initial_distance=int(start_raw.get("min_initial_distance", 3)),
         ),
-        ollama=OllamaConfig(
-            model=str(ollama_raw.get("model", "llama3.1")),
-            base_url=str(ollama_raw.get("base_url", "http://127.0.0.1:11434")),
-            auth_header=str(ollama_raw.get("auth_header", "")),
-            enabled=bool(ollama_raw.get("enabled", False)),
+        llm=LLMConfig(
+            model=str(llm_raw.get("model", "glm-4.7-flashx")),
+            base_url=str(llm_raw.get("base_url", "https://api.z.ai/api/paas/v4")),
+            api_key=str(llm_raw.get("api_key", "")),
+            enabled=bool(llm_raw.get("enabled", False)),
         ),
         mcp=MCPConfig(
             cop=MCPEndpoint(

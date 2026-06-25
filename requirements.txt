@@ -8,9 +8,9 @@ PyYAML>=6.0
 fastmcp>=2.0
 mcp>=1.0
 
-# Natural-language layer (local Ollama, Approach 2). Optional at runtime:
-# the NL layer degrades gracefully if Ollama is absent.
-ollama>=0.3
+# Natural-language layer (Approach 1: public GLM API, OpenAI-compatible).
+# Optional at runtime: the NL layer degrades gracefully if GLM/openai is absent.
+openai>=1.0
 
 # Pygame GUI (optional / headless-safe)
 pygame>=2.6

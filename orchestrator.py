@@ -54,12 +54,13 @@ def main():
     p = argparse.ArgumentParser(description="HW6 MCP orchestrator (game client)")
     mode = p.add_mutually_exclusive_group()
     mode.add_argument("--inprocess", action="store_true",
-                      help="run tools in-process (default; no servers needed)")
+                      help="run tools in-process (no servers needed; for CI/tests)")
     mode.add_argument("--networked", action="store_true",
-                      help="connect to the two live FastMCP servers over HTTP")
+                      help="connect to the two live FastMCP servers over HTTP (default)")
     p.add_argument("--quiet", action="store_true")
     args = p.parse_args()
-    run(networked=args.networked, verbose=not args.quiet)
+    # Real MCP (networked) is the default; --inprocess opts out.
+    run(networked=not args.inprocess, verbose=not args.quiet)
 
 
 if __name__ == "__main__":

@@ -24,12 +24,14 @@ start:
   thief: random
   min_initial_distance: 3  # keep agents apart at start (> vision_radius for stage 3/4 sanity)
 
-# --- LLM backend (Approach 2: local Ollama, optionally tunneled) ---
-ollama:
-  model: llama3.1
-  base_url: http://127.0.0.1:11434
-  auth_header: ""         # set when accessed through an authenticated tunnel
-  enabled: false          # Phase 5 toggles NL layer on; heuristic/Q play works without it
+# --- LLM backend (Approach 1: public GLM cloud API, OpenAI-compatible) ---
+# The API key is read from `api_key` below, or (preferred) from the GLM_API_KEY
+# env var when api_key is empty. Keep secrets OUT of this committed file.
+llm:
+  model: glm-4.7-flashx
+  base_url: https://api.z.ai/api/paas/v4
+  api_key: ""             # prefer exporting GLM_API_KEY over hard-coding here
+  enabled: true           # real GLM NL; falls back to templates when no key is set
 
 # --- MCP servers (two separate servers, §5) ---
 mcp:
