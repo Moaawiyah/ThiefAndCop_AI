@@ -47,6 +47,7 @@ class LLMClient:
         self.config = config
         self.available = False
         self._client = None
+        self.usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
         if config.enabled and _OPENAI_IMPORT_OK:
             self._try_connect()
 
@@ -83,6 +84,10 @@ class LLMClient:
                 temperature=0.8,
                 extra_body={"thinking": {"type": "disabled"}},
             )
+            if resp.usage:
+                self.usage["prompt_tokens"] += resp.usage.prompt_tokens
+                self.usage["completion_tokens"] += resp.usage.completion_tokens
+                self.usage["total_tokens"] += resp.usage.total_tokens
             return (resp.choices[0].message.content or "").strip()
         except Exception:
             # Any runtime failure -> mark unavailable so callers use fallbacks.

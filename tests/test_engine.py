@@ -25,8 +25,11 @@ def test_capture_scores_cop_win():
     eng.state.cop = (0, 0)
     eng.state.thief = (1, 1)
 
-    thief_stay = lambda obs, e: {"type": "move", "action": "stay"}
-    cop_chase = lambda obs, e: {"type": "move", "action": "SE"}
+    def thief_stay(obs, e):
+        return {"type": "move", "action": "stay"}
+
+    def cop_chase(obs, e):
+        return {"type": "move", "action": "SE"}
 
     res = eng.play_sub_game(cop_chase, thief_stay, index=1)
     # The series resets positions, so instead test scoring mapping directly.
@@ -39,7 +42,9 @@ def test_capture_scores_cop_win():
 def test_timeout_is_thief_win():
     cfg, eng = make_engine(rows=5, cols=5)
     # Both agents stay forever -> thief survives -> thief win.
-    stay = lambda obs, e: {"type": "move", "action": "stay"}
+    def stay(obs, e):
+        return {"type": "move", "action": "stay"}
+
     res = eng.play_sub_game(stay, stay, index=1)
     assert res.winner == "thief"
     assert res.moves == cfg.max_moves
@@ -54,8 +59,9 @@ def test_thief_moving_onto_cop_is_capture():
     eng.state.thief = (2, 3)
 
     # Thief moves W (onto cop) -> immediate capture before cop moves.
-    thief_suicide = lambda obs, e: {"type": "move", "action": "W"}
-    cop_stay = lambda obs, e: {"type": "move", "action": "stay"}
+    def thief_suicide(obs, e):
+        return {"type": "move", "action": "W"}
+
     # We cannot use play_sub_game (it resets), so simulate the first turn.
     eng.apply_thief_action(thief_suicide(None, eng))
     assert eng.is_capture()
@@ -67,9 +73,7 @@ def test_barrier_placement_limit():
     eng.reset_sub_game()
     eng.state.cop = (2, 2)
     # Place 5 barrier requests; only 3 should stick (and only one per cell).
-    place_barrier = lambda obs, e: {"type": "barrier"}
     for _ in range(5):
-        before = eng.state.barriers_placed
         eng.apply_cop_action({"type": "barrier"})
         # cop stays in same cell, so after first placement the cell is already a
         # barrier and further placements on same cell fail; move then place.

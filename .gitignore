@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+.coverage
+.venv/
+
+# Per-run logs (regenerated every run; not submission evidence)
+artifacts/logs/
 
 # Secrets — never commit keys or OAuth tokens
 .env

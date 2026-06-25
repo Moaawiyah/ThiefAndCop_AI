@@ -20,6 +20,7 @@ from core.observation import Observation
 from agents.policy import build_policy
 from llm.glm_client import LLMClient
 from mcp_client.bus import ToolBus
+from mcp_client.run_logging import setup_run_logger
 
 
 class Orchestrator:
@@ -30,6 +31,9 @@ class Orchestrator:
         self.bus = bus
         self.token = config.mcp.auth_token
         self.verbose = verbose
+        self.logger, self.log_path = setup_run_logger(
+            "orchestrator", config.q_dir_abs(), verbose
+        )
         self.llm = LLMClient(config.llm)
         # Policies (Q-table if trained, else heuristic) — owned by the client.
         self.cop_policy = build_policy("cop", config)
@@ -39,8 +43,7 @@ class Orchestrator:
         self.mirror = GameEngine(config)
 
     def log(self, *a):
-        if self.verbose:
-            print(*a)
+        self.logger.info(" ".join(str(x) for x in a))
 
     # ----- low-level helpers ----------------------------------------------
     def _both(self, tool: str, **kwargs) -> dict:
@@ -171,5 +174,9 @@ class Orchestrator:
             self.log(f"  sub-game {r['sub_game']}: winner={r['winner']:<5} "
                      f"moves={r['moves']:<2} cop={r['cop_score']} thief={r['thief_score']}")
         self.log(f"  TOTALS -> cop={totals['cop']} thief={totals['thief']}")
-        self.log(f"  LLM (GLM) active: {self.llm.available}")
-        return {"results": results, "totals": totals, "llm_active": self.llm.available}
+        self.log(f"  LLM (GLM) active: {self.llm.available} | tokens used: {self.llm.usage}")
+        self.log(f"  full run log written to: {self.log_path}")
+        return {
+            "results": results, "totals": totals,
+            "llm_active": self.llm.available, "llm_usage": dict(self.llm.usage),
+        }

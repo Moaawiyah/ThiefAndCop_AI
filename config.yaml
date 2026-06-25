@@ -60,5 +60,5 @@ report:
   group_name: "Team-Name"
   students: []
   github_repo: ""
-  cop_mcp_url: ""
-  thief_mcp_url: ""
+  cop_mcp_url: "https://suse-cabinet-freeze-president.trycloudflare.com/mcp"
+  thief_mcp_url: "https://oriented-cdt-overview-richards.trycloudflare.com/mcp"

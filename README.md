@@ -15,34 +15,34 @@ strategy itself (§14).
 ## 1. Quick start
 
 ```bash
-# 1. (recommended) create a virtual environment, then install deps
-python3 -m pip install -r requirements.txt
+# 1. install deps (uv resolves pyproject.toml + uv.lock into a local .venv)
+uv sync
 
 # 2. run the staged sanity checks (2x2 -> 5x5), headless
-python3 scripts/sanity_check.py
+uv run python3 scripts/sanity_check.py
 
 # 3. play a full local 6-sub-game series via the MCP orchestrator (in-process)
-python3 orchestrator.py --inprocess
+uv run python3 orchestrator.py --inprocess
 
 # 4. train the Q-Learning agents (writes Q-tables + learning curve to artifacts/)
-python3 agents/train.py                  # full run (config.qlearning.episodes)
-python3 agents/train.py --episodes 2000  # fast smoke test
+uv run python3 agents/train.py                  # full run (config.qlearning.episodes)
+uv run python3 agents/train.py --episodes 2000  # fast smoke test
 
 # 5. launch the GUI (live window, or headless screenshots for the report)
-python3 gui/visualizer.py                 # needs a display
-python3 gui/visualizer.py --headless      # renders frames to artifacts/
+uv run python3 gui/visualizer.py                 # needs a display
+uv run python3 gui/visualizer.py --headless      # renders frames to artifacts/
 
 # 6. produce the JSON report (dry-run prints the schema-valid Internal Game JSON)
-python3 reporting/email_report.py --dry-run
+uv run python3 reporting/email_report.py --dry-run
 
 # 7. run the test suite
-python3 -m pytest tests/ -q
+uv run pytest tests/ -q
 ```
 
-All packages installed cleanly into the system Python on macOS (Python 3.13); no
-`--break-system-packages` or venv was strictly required, but a venv at
-`hw6/.venv` is the recommended isolation if your environment is externally
-managed.
+Package management is **uv-only**: dependencies live in `pyproject.toml`, pinned
+in `uv.lock`. There is no `requirements.txt`. Copy `.env.example` to `.env` and
+fill in `GLM_API_KEY` for real LLM dialogue (optional — the game runs on
+deterministic NL templates without it).
 
 ### Running the networked MCP pipeline
 
@@ -51,11 +51,11 @@ ports) with the orchestrator connecting over HTTP:
 
 ```bash
 # terminal 1
-python3 -m mcp_servers.cop_server      # http://127.0.0.1:8101/mcp
+uv run python3 -m mcp_servers.cop_server      # http://127.0.0.1:8101/mcp
 # terminal 2
-python3 -m mcp_servers.thief_server    # http://127.0.0.1:8102/mcp
+uv run python3 -m mcp_servers.thief_server    # http://127.0.0.1:8102/mcp
 # terminal 3
-python3 -c "import orchestrator; print(orchestrator.run(networked=True, verbose=False)['totals'])"
+uv run python3 -c "import orchestrator; print(orchestrator.run(networked=True, verbose=False)['totals'])"
 ```
 
 The networked path was verified end-to-end: each live server handled ~350 real
@@ -69,7 +69,7 @@ MCP `POST /mcp` tool calls per series and the orchestrator completed a full
 ```
 hw6/
   config.yaml              # ALL parameters (no hard-coding — §10)
-  requirements.txt
+  pyproject.toml / uv.lock  # dependencies (uv-only; no requirements.txt)
   README.md                # this scientific report
   core/
     config.py              # load/validate config.yaml -> dataclasses
@@ -270,9 +270,9 @@ not a password — §9). To keep the project testable without credentials, sendi
 **dry-run by default**:
 
 ```bash
-python3 reporting/email_report.py --dry-run   # prints schema-valid Internal Game JSON
-python3 reporting/email_report.py --play      # play a real series, then report
-python3 reporting/email_report.py --send      # really send (needs OAuth creds)
+uv run python3 reporting/email_report.py --dry-run   # prints schema-valid Internal Game JSON
+uv run python3 reporting/email_report.py --play      # play a real series, then report
+uv run python3 reporting/email_report.py --send      # really send (needs OAuth creds)
 ```
 
 For `--send`, place an OAuth client secret at `reporting/credentials.json`
