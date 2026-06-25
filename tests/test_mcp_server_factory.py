@@ -137,3 +137,21 @@ def test_verify_position_and_advance_move_counter_over_mcp():
     verify_res, advance_res = run(_go())
     assert verify_res["confirmed"] is True
     assert advance_res["move_number"] == 1
+
+
+def test_sync_opponent_position_over_mcp():
+    cfg = load_config()
+    server = build_server(cfg, role="cop")
+    session = server._game_session
+
+    async def _go():
+        async with Client(server) as client:
+            res = await client.call_tool(
+                "sync_opponent_position",
+                {"token": TOKEN, "agent": "thief", "row": 2, "col": 2},
+            )
+            return res.data
+
+    data = run(_go())
+    assert data == {"ok": True, "agent": "thief", "pos": [2, 2]}
+    assert session.engine.state.thief == (2, 2)

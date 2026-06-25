@@ -172,3 +172,12 @@ def advance_move_counter(session: GameSession, token: str) -> dict:
         "done": session.done,
         "winner": session.winner,
     }
+
+
+def sync_opponent_position(session: GameSession, token: str, agent: str, row: int, col: int) -> dict:
+    """Push ``agent``'s ground-truth position, learned from their own server,
+    into this server's engine (inter-group bonus play, §12). Works for either
+    role via ``agent``, same as :func:`submit_move`."""
+    _check(token, session.config)
+    session.set_agent_position(agent, row, col)
+    return {"ok": True, "agent": agent, "pos": [int(row), int(col)]}

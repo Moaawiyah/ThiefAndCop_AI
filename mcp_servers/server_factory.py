@@ -76,6 +76,12 @@ def build_server(config: Config, role: str) -> FastMCP:
         """Begin a fresh sub-game, optionally at explicit canonical positions."""
         return T.start_sub_game(session, token, cop_row, cop_col, thief_row, thief_col)
 
+    @mcp.tool
+    def sync_opponent_position(token: str, agent: str, row: int, col: int) -> dict:
+        """Inter-group bonus play (§12): push `agent`'s real position, learned
+        from their own server, into this server's engine."""
+        return T.sync_opponent_position(session, token, agent, row, col)
+
     # Expose the session for in-process integration tests.
     mcp._game_session = session  # type: ignore[attr-defined]
     return mcp
@@ -84,5 +90,5 @@ def build_server(config: Config, role: str) -> FastMCP:
 TOOL_NAMES: List[str] = [
     "send_message", "read_message", "get_observation", "verify_position",
     "submit_move", "place_barrier", "game_status", "advance_move_counter",
-    "start_sub_game",
+    "start_sub_game", "sync_opponent_position",
 ]

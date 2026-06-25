@@ -59,6 +59,15 @@ class GameSession:
         self.done = False
         self.winner = None
 
+    def set_agent_position(self, agent: str, row: int, col: int) -> None:
+        """Override one agent's position (either role) with ground truth from
+        their own server — used for inter-group bonus play (§12)."""
+        pos = (int(row), int(col))
+        if agent == "cop":
+            self.engine.state.cop = pos
+        else:
+            self.engine.state.thief = pos
+
 
 def check_token(token: str, config: Config) -> None:
     """Raise :class:`AuthError` unless ``token`` matches the configured token."""

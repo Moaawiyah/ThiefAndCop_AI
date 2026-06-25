@@ -131,3 +131,22 @@ def test_advance_move_counter_no_timeout_yet():
     assert out["move_number"] == 1
     assert out["done"] is False
     assert out["winner"] is None
+
+
+def test_sync_opponent_position_works_for_either_role():
+    s = make_session()
+    out_thief = T.sync_opponent_position(s, TOKEN, "thief", 3, 3)
+    assert out_thief == {"ok": True, "agent": "thief", "pos": [3, 3]}
+    assert s.engine.state.thief == (3, 3)
+
+    out_cop = T.sync_opponent_position(s, TOKEN, "cop", 0, 0)
+    assert out_cop == {"ok": True, "agent": "cop", "pos": [0, 0]}
+    assert s.engine.state.cop == (0, 0)
+    # Setting one agent's position must not disturb the other's.
+    assert s.engine.state.thief == (3, 3)
+
+
+def test_sync_opponent_position_rejects_bad_token():
+    s = make_session()
+    with pytest.raises(AuthError):
+        T.sync_opponent_position(s, "wrong-token", "thief", 1, 1)
