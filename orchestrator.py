@@ -33,8 +33,25 @@ from mcp_client.bus import InProcessBus, NetworkedBus, ToolBus
 from mcp_client.orchestrator_runner import Orchestrator  # noqa: F401  (re-export)
 
 
+def _load_dotenv(path: str = ".env") -> None:
+    """Load KEY=VALUE lines from .env so GLM_API_KEY reaches the LLM client,
+    even when the shell hasn't sourced it. Existing env vars win (setdefault)."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    full = path if os.path.isabs(path) else os.path.join(here, path)
+    if not os.path.exists(full):
+        return
+    with open(full, encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            os.environ.setdefault(key.strip(), value.strip())
+
+
 def run(networked: bool = False, verbose: bool = True) -> dict:
     """Top-level entry: build a bus + orchestrator and play the series."""
+    _load_dotenv()
     config = load_config()
     bus: ToolBus
     if networked:

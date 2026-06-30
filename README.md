@@ -25,8 +25,11 @@ uv sync
 # 2. run the staged sanity checks (2x2 -> 5x5), headless
 uv run python3 scripts/sanity_check.py
 
-# 3. play a full local 6-sub-game series via the MCP orchestrator (in-process)
-uv run python3 orchestrator.py --inprocess
+# 3. play a full 6-sub-game series OVER THE LIVE LLM (z.ai GLM)
+#    orchestrator.py auto-loads .env, so a bare run already goes over the LLM:
+uv run python3 orchestrator.py                   # networked series, verbose
+uv run python3 orchestrator.py --inprocess       # same, no servers needed
+#    confirm at the end:  "LLM (GLM) active: True | tokens used: {...non-zero...}"
 
 # 4. train the Q-Learning agents (writes Q-tables + learning curve to artifacts/)
 uv run python3 agents/train.py                  # full run (config.qlearning.episodes)
@@ -44,14 +47,25 @@ uv run pytest tests/ -q
 ```
 
 Package management is **uv-only**: dependencies live in `pyproject.toml`, pinned
-in `uv.lock`. There is no `requirements.txt`. The default LLM backend is a
-**local [Ollama](https://ollama.com) server** (OpenAI-compatible) running
-`qwen2.5:7b` at `http://localhost:11434/v1` — configured in `config.yaml`. Start
-it with `ollama serve` and `ollama pull qwen2.5:7b`. Real LLM dialogue is
-optional: with no reachable backend the game runs on deterministic NL templates.
-The same `llm/glm_client.py` also speaks to any other OpenAI-compatible endpoint
-(e.g. the z.ai GLM cloud API) — just set `llm.base_url`/`llm.model` and put the
-key in `.env` as `GLM_API_KEY`.
+in `uv.lock`. There is no `requirements.txt`.
+
+**The game runs over a real LLM.** The configured backend is the **z.ai GLM
+cloud API** (`glm-4.7-flashx`, OpenAI-compatible) in `config.yaml`. The API key
+is read from `GLM_API_KEY` — copy `.env.example` to `.env` and fill it in (the
+`.env` file is gitignored and must never be committed). Because `config.yaml`
+leaves `llm.api_key` empty, the client falls back to that env var.
+**`orchestrator.py` auto-loads `.env`** (see `_load_dotenv`), so a bare
+`uv run python3 orchestrator.py` already runs over the LLM — no manual `export`
+or wrapper needed. A successful run ends with `LLM (GLM) active: True`
+and a non-zero token count — that is the proof the dialogue went over the LLM.
+If `.env` is missing or `GLM_API_KEY` is unreachable, the client degrades
+gracefully to deterministic NL templates (`active: False`, 0 tokens) so the
+pipeline still completes on the Q-policy alone.
+
+The same `llm/glm_client.py` speaks to **any** OpenAI-compatible endpoint, so a
+local [Ollama](https://ollama.com) server (e.g. `ollama serve` + `qwen2.5:7b` at
+`http://localhost:11434/v1`) is a drop-in offline alternative — just point
+`llm.base_url`/`llm.model` at it and set `llm.api_key: "ollama"`.
 
 ### Running the networked MCP pipeline
 
@@ -94,7 +108,7 @@ hw6/
     train_utils.py         # reward shaping, eval, curve/CSV/PNG writers
     policy.py              # Q-policy with last-known-opponent belief tracking
   llm/
-    glm_client.py          # fault-tolerant OpenAI-compatible LLM client — local Ollama by default (graceful degradation)
+    glm_client.py          # fault-tolerant OpenAI-compatible LLM client (z.ai GLM by default; graceful degradation)
     prompts.py             # NL system/turn prompts (generate + parse)
   mcp_servers/
     tools.py               # shared tool impls (the game logic behind the tools)
@@ -106,7 +120,7 @@ hw6/
     bus.py                 # InProcessBus / NetworkedBus transports
     orchestrator_runner.py # the turn loop driving both agents over a bus
     run_logging.py         # structured per-run orchestrator logs -> artifacts/logs
-  orchestrator.py          # MCP CLIENT entrypoint: owns LLM + dialogue + game loop
+  orchestrator.py          # MCP CLIENT entrypoint: owns LLM + dialogue + game loop (auto-loads .env)
   gui/
     visualizer.py          # Pygame real-time grid (headless-safe)
     render.py              # pure frame-drawing helpers (testable, no I/O)
@@ -160,7 +174,7 @@ The single most important rule: **the LLM is NOT inside the MCP server.**
 ```
                 +------------------- orchestrator.py (MCP CLIENT) -------------------+
                 |  owns: dialogue logic, belief tracking, Q/heuristic policies,      |
-                |        and the LLM (local Ollama via llm/glm_client.py)            |
+                |        and the LLM (z.ai GLM via llm/glm_client.py)                |
                 +---------------------------+---------------------------------------+
                           | tool calls (HTTP / in-process)        | tool calls
                           v                                        v
@@ -248,7 +262,7 @@ the latest NL messages from each agent. Generated headlessly with
 `python3 gui/visualizer.py --headless`.
 
 ### 6.3 CLI logs — real natural-language dialogue
-`artifacts/nl_dialogue_log.txt` — a full series run with the **live local LLM (Ollama `qwen2.5:7b`)**
+`artifacts/nl_dialogue_log.txt` — a full series run with the **live LLM (z.ai GLM `glm-4.7-flashx`)**
 enabled. Excerpt:
 
 ```
@@ -271,11 +285,11 @@ Not exercised by the local pipeline, but scaffolded:
 * `deploy/ngrok.yaml` — OPTIONAL legacy scaffold: exposes a **local** LLM
   (`127.0.0.1:11434`) over HTTPS behind an ngrok **Traffic Policy** that enforces
   **Basic Auth**, so only requests with the right `Authorization` header reach the
-  model. The default backend is a **local Ollama** server (`127.0.0.1:11434`),
-  which runs on the dev machine and needs no tunnel; the ngrok scaffold only
-  matters if you expose that local model to a remote orchestrator. Set
-  `llm.base_url` / `llm.api_key` / `llm.model` in `config.yaml` to point at a
-  different OpenAI-compatible endpoint (e.g. the z.ai GLM cloud API).
+  model. The default backend is the **z.ai GLM cloud API** (Approach 1), which
+  needs no tunnel; the ngrok scaffold only matters if you instead expose a
+  *local* model (e.g. Ollama) to a remote orchestrator. Set `llm.base_url` /
+  `llm.api_key` / `llm.model` in `config.yaml` to point at any other
+  OpenAI-compatible endpoint.
 * `deploy/prefect_flow.py` — a Prefect flow wrapping each MCP server as a managed
   process with a public URL; access stays **token-gated** (rotate
   `config.mcp.auth_token` to revoke).
@@ -322,7 +336,7 @@ partner team and their two public MCP URLs.
 
 Every game parameter lives in `config.yaml`: `grid_size`, `max_moves`,
 `num_games`, `max_barriers`, the full `scoring` table, `vision_radius`,
-`allow_diagonal`, start rules, LLM backend (local Ollama), MCP host/port/token, Q-Learning
+`allow_diagonal`, start rules, LLM backend (z.ai GLM), MCP host/port/token, Q-Learning
 hyper-parameters, and report metadata. `core/config.py` validates these into typed
 dataclasses; the rest of the code never hard-codes a game constant.
 
