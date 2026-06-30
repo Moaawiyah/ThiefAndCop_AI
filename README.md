@@ -22,28 +22,28 @@ strategy itself.
 # 1. install deps (uv resolves pyproject.toml + uv.lock into a local .venv)
 uv sync
 
-# 2. ONE-SHOT PIPELINE (main.py): regenerate every artifact in order
-#    train -> Q-tables + learning curve, gui -> screenshots,
-#    play  -> live-LLM series + log, report -> schema-valid JSON.
-#    main.py auto-loads .env, so the played series really runs over the LLM.
-uv run python3 main.py                  # all stages (training is slow: episodes=20000)
-uv run python3 main.py --no-train       # skip training; reuse existing Q-tables
-uv run python3 main.py --networked      # play over the two live MCP servers
-uv run python3 main.py --only play      # run a single stage (repeatable)
+# 2. run the staged sanity checks (2x2 -> 5x5), headless
+uv run python3 scripts/sanity_check.py
 
-# 3. PLAY ONLY (orchestrator.py): the graded core — full 6-sub-game series with
-#    NL dialogue over MCP. It now auto-loads .env, so a bare run is OVER THE LLM:
+# 3. play a full 6-sub-game series OVER THE LIVE LLM (z.ai GLM)
+#    orchestrator.py auto-loads .env, so a bare run already goes over the LLM:
 uv run python3 orchestrator.py                   # networked series, verbose
 uv run python3 orchestrator.py --inprocess       # same, no servers needed
-./run.sh                                         # equivalent convenience wrapper
 #    confirm at the end:  "LLM (GLM) active: True | tokens used: {...non-zero...}"
 
-# 4. individual stages (all also reachable via main.py --only <stage>)
-uv run python3 scripts/sanity_check.py           # staged 2x2 -> 5x5 sanity
-uv run python3 agents/train.py --episodes 2000   # Q-tables + learning curve (fast)
-uv run python3 gui/visualizer.py --headless      # GUI screenshots -> artifacts/
-uv run python3 reporting/email_report.py --dry-run  # schema-valid Internal Game JSON
-uv run pytest tests/ -q                          # test suite
+# 4. train the Q-Learning agents (writes Q-tables + learning curve to artifacts/)
+uv run python3 agents/train.py                  # full run (config.qlearning.episodes)
+uv run python3 agents/train.py --episodes 2000  # fast smoke test
+
+# 5. launch the GUI (live window, or headless screenshots for the report)
+uv run python3 gui/visualizer.py                 # needs a display
+uv run python3 gui/visualizer.py --headless      # renders frames to artifacts/
+
+# 6. produce the JSON report (dry-run prints the schema-valid Internal Game JSON)
+uv run python3 reporting/email_report.py --dry-run
+
+# 7. run the test suite
+uv run pytest tests/ -q
 ```
 
 Package management is **uv-only**: dependencies live in `pyproject.toml`, pinned
@@ -53,10 +53,10 @@ in `uv.lock`. There is no `requirements.txt`.
 cloud API** (`glm-4.7-flashx`, OpenAI-compatible) in `config.yaml`. The API key
 is read from `GLM_API_KEY` — copy `.env.example` to `.env` and fill it in (the
 `.env` file is gitignored and must never be committed). Because `config.yaml`
-leaves `llm.api_key` empty, the client falls back to that env var. **Both
-`main.py` and `orchestrator.py` auto-load `.env`** (see `_load_dotenv`), so a
-bare `uv run python3 orchestrator.py` already runs over the LLM — no manual
-`export` or wrapper needed. A successful run ends with `LLM (GLM) active: True`
+leaves `llm.api_key` empty, the client falls back to that env var.
+**`orchestrator.py` auto-loads `.env`** (see `_load_dotenv`), so a bare
+`uv run python3 orchestrator.py` already runs over the LLM — no manual `export`
+or wrapper needed. A successful run ends with `LLM (GLM) active: True`
 and a non-zero token count — that is the proof the dialogue went over the LLM.
 If `.env` is missing or `GLM_API_KEY` is unreachable, the client degrades
 gracefully to deterministic NL templates (`active: False`, 0 tokens) so the
@@ -121,8 +121,6 @@ hw6/
     orchestrator_runner.py # the turn loop driving both agents over a bus
     run_logging.py         # structured per-run orchestrator logs -> artifacts/logs
   orchestrator.py          # MCP CLIENT entrypoint: owns LLM + dialogue + game loop (auto-loads .env)
-  main.py                  # one-shot pipeline: train + gui + play + report (all artifacts)
-  run.sh                   # convenience wrapper: sources .env, then runs orchestrator.py
   gui/
     visualizer.py          # Pygame real-time grid (headless-safe)
     render.py              # pure frame-drawing helpers (testable, no I/O)
