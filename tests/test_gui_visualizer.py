@@ -2,6 +2,9 @@
 
 import os
 import sys
+import types
+
+import pytest
 
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
@@ -59,3 +62,45 @@ def test_pump_returns_true_with_no_events(tmp_path):
     cfg = small_config(tmp_path)
     v = viz_mod.Visualizer(cfg, headless=True, fps=1000, screenshots=0)
     assert v._pump() is True
+
+
+def test_pump_returns_false_on_quit(tmp_path, monkeypatch):
+    cfg = small_config(tmp_path)
+    v = viz_mod.Visualizer(cfg, headless=True, fps=1000, screenshots=0)
+    quit_event = types.SimpleNamespace(type=viz_mod.pygame.QUIT)
+    monkeypatch.setattr(viz_mod.pygame.event, "get", lambda: [quit_event])
+    assert v._pump() is False
+
+
+def test_pump_returns_false_on_escape(tmp_path, monkeypatch):
+    cfg = small_config(tmp_path)
+    v = viz_mod.Visualizer(cfg, headless=True, fps=1000, screenshots=0)
+    esc = types.SimpleNamespace(type=viz_mod.pygame.KEYDOWN, key=viz_mod.pygame.K_ESCAPE)
+    monkeypatch.setattr(viz_mod.pygame.event, "get", lambda: [esc])
+    assert v._pump() is False
+
+
+def test_visualizer_requires_pygame(tmp_path, monkeypatch):
+    cfg = small_config(tmp_path)
+    monkeypatch.setattr(viz_mod, "_PYGAME_OK", False)
+    with pytest.raises(RuntimeError):
+        viz_mod.Visualizer(cfg, headless=True)
+
+
+def test_main_without_pygame_exits(monkeypatch):
+    monkeypatch.setattr(viz_mod, "_PYGAME_OK", False)
+    monkeypatch.setattr(sys, "argv", ["visualizer.py"])
+    with pytest.raises(SystemExit):
+        viz_mod.main()
+
+
+def test_visualizer_thief_win_scoring(tmp_path, monkeypatch):
+    cfg = small_config(tmp_path, num_games=1, max_moves=3, rows=5, cols=5)
+    v = viz_mod.Visualizer(cfg, headless=True, fps=1000, screenshots=0)
+    # Force both agents to stay put: no capture -> thief survives -> thief wins.
+    stay = {"type": "move", "action": "stay"}
+    monkeypatch.setattr(v, "cop_policy", lambda obs, eng: stay)
+    monkeypatch.setattr(v, "thief_policy", lambda obs, eng: stay)
+    totals = v.run()
+    assert totals["thief"] == cfg.scoring.thief_win
+    assert totals["cop"] == cfg.scoring.cop_loss

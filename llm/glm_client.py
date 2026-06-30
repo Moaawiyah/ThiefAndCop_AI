@@ -82,7 +82,13 @@ class LLMClient:
                 ],
                 max_tokens=max_tokens,
                 temperature=0.8,
-                extra_body={"thinking": {"type": "disabled"}},
+                # thinking/* disables reasoning on z.ai GLM; reasoning_effort
+                # does the same for Ollama models (e.g. qwen3) — each backend
+                # ignores the other's key, so both stay fast and non-empty.
+                extra_body={
+                    "thinking": {"type": "disabled"},
+                    "reasoning_effort": "none",
+                },
             )
             if resp.usage:
                 self.usage["prompt_tokens"] += resp.usage.prompt_tokens

@@ -2,22 +2,10 @@
 
 These functions are the *logic* behind the tools exposed by both FastMCP servers
 (``cop_server.py`` / ``thief_server.py``). They operate on a process-local
-:class:`GameSession` that holds the authoritative engine state for one agent's
-server. The orchestrator (the MCP **client**) keeps the two servers in sync by
-mirroring submitted moves — the servers themselves never run the LLM (§5.2).
-
-Exposed tools (per the plan):
-    * send_message    — post a free-NL message to the shared mailbox
-    * read_message    — read the latest message from the opponent
-    * get_observation — partial observation for this server's agent
-    * verify_position — mutual location confirmation (the agent asserts where it
-                        believes it is; the server confirms/denies)
-    * submit_move     — apply a movement action for this agent
-    * place_barrier   — cop-only barrier placement
-    * game_status     — scores, move counter, winner, done flag
-
-Auth: every tool takes a ``token`` and is rejected unless it matches the
-configured ``mcp.auth_token`` (token-based auth, §6).
+:class:`GameSession` holding the authoritative engine state for one agent's
+server; the servers never run the LLM (§5.2) — the orchestrator keeps the two in
+sync by mirroring submitted moves. Every tool takes a ``token`` and is rejected
+unless it matches the configured ``mcp.auth_token`` (token-based auth, §6).
 
 The session/mailbox dataclasses live in :mod:`mcp_servers.session` and are
 re-exported here so existing imports keep working.

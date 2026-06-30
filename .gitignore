@@ -15,5 +15,9 @@ config.local.yaml
 reporting/credentials.json
 reporting/token.json
 
+# Assignment brief (not part of the submitted source)
+hw6.md
+hw6.pdf
+
 # OS
 .DS_Store

@@ -1,14 +1,9 @@
-"""The :class:`Orchestrator` — turn-driving / dialogue logic (assignment §5.2).
+"""The :class:`Orchestrator` — turn-driving / dialogue logic.
 
-Split out of :mod:`orchestrator` to keep the entry-point module small. This is
-the autonomous MCP client that owns the LLM and all decision logic, talking to
-the two servers only through a :class:`~mcp_client.bus.ToolBus`. It is re-exported
-from :mod:`orchestrator` so existing imports keep working.
-
-Per turn (thief first, then cop) it reads the opponent's NL message, generates +
-posts its own, decides an action via its Q/heuristic policy, submits it to BOTH
-servers (keeping them lock-step with a local mirror engine), and checks for
-capture / timeout.
+Autonomous MCP client that owns the LLM and decision logic, talking to the two
+servers only through a :class:`~mcp_client.bus.ToolBus`, and re-exported from
+:mod:`orchestrator`. Per turn it exchanges NL messages, picks an action via its
+Q/heuristic policy, and submits it to both servers (kept lock-step with a mirror).
 """
 
 from __future__ import annotations
@@ -87,10 +82,8 @@ class Orchestrator:
             return {"captured": self.mirror.is_capture()}
         act = action.get("action", "stay")
         self._both("submit_move", agent=agent, action=act)
-        if agent == "thief":
-            self.mirror.apply_thief_action({"type": "move", "action": act})
-        else:
-            self.mirror.apply_cop_action({"type": "move", "action": act})
+        apply = self.mirror.apply_thief_action if agent == "thief" else self.mirror.apply_cop_action
+        apply({"type": "move", "action": act})
         return {"captured": self.mirror.is_capture()}
 
     def _turn(self, agent: str, move: int) -> bool:
@@ -99,14 +92,11 @@ class Orchestrator:
         msg = self._exchange_messages(agent, obs)
         action = self._decide_action(agent, obs)
         res = self._apply_action(agent, action)
-        if agent == "thief":
-            self.log(f"  [{move:>2}] THIEF says: \"{msg}\" -> {action}")
-        else:
-            self.log(f"       COP   says: \"{msg}\" -> {action}")
+        label = f"  [{move:>2}] THIEF says:" if agent == "thief" else "       COP   says:"
+        self.log(f"{label} \"{msg}\" -> {action}")
         if res["captured"]:
-            where = self.mirror.state.cop
             who = "thief moved onto cop" if agent == "thief" else "cop landed on thief"
-            self.log(f"       >> capture! {who} at {where}")
+            self.log(f"       >> capture! {who} at {self.mirror.state.cop}")
             return True
         return False
 
@@ -114,10 +104,9 @@ class Orchestrator:
         # Reset both servers' sessions and the mirror, with the cop as canonical.
         self._start_sub_game_on_servers()
         self._sync_mirror_start()
-        if hasattr(self.cop_policy, "reset_belief"):
-            self.cop_policy.reset_belief()
-        if hasattr(self.thief_policy, "reset_belief"):
-            self.thief_policy.reset_belief()
+        for policy in (self.cop_policy, self.thief_policy):
+            if hasattr(policy, "reset_belief"):
+                policy.reset_belief()
 
         cfg = self.config
         winner = "thief"

@@ -29,8 +29,6 @@ import numpy as np
 
 from core.grid import MOVE_ACTIONS_4, MOVE_ACTIONS_8
 
-UNKNOWN = "unknown"
-
 
 def action_set(role: str, allow_diagonal: bool) -> List[str]:
     """Ordered action labels for a role. Cop gets an extra 'barrier' action."""

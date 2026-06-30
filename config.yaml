@@ -28,10 +28,10 @@ start:
 # The API key is read from `api_key` below, or (preferred) from the GLM_API_KEY
 # env var when api_key is empty. Keep secrets OUT of this committed file.
 llm:
-  model: glm-4.7-flashx
-  base_url: https://api.z.ai/api/paas/v4
-  api_key: ""             # prefer exporting GLM_API_KEY over hard-coding here
-  enabled: true           # real GLM NL; falls back to templates when no key is set
+  model: qwen2.5:7b
+  base_url: http://localhost:11434/v1   # local Ollama (OpenAI-compatible endpoint)
+  api_key: "ollama"       # Ollama ignores the key, but the client needs a non-empty value
+  enabled: true           # real local NL via Ollama; falls back to templates if unreachable
 
 # --- MCP servers (two separate servers, §5) ---
 mcp:

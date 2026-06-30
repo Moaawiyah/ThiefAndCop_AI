@@ -3,6 +3,8 @@
 import sys
 from unittest.mock import MagicMock
 
+import pytest
+
 import reporting.email_report as er
 from core.config import load_config
 from reporting.report_schema import validate_internal
@@ -78,3 +80,58 @@ def test_main_send_path_invokes_send_email(monkeypatch, capsys):
     er.main()
     out = capsys.readouterr().out
     assert "Sent. Gmail message id: abc999" in out
+
+
+# --- _gmail_service OAuth paths (the google-auth imports are real deps; we patch
+#     the classes they resolve to at call time). ---
+def test_gmail_service_uses_valid_cached_token(monkeypatch, tmp_path):
+    token = tmp_path / "token.json"
+    token.write_text("{}")
+    fake_creds = MagicMock(valid=True)
+    fake_credentials_cls = MagicMock()
+    fake_credentials_cls.from_authorized_user_file.return_value = fake_creds
+    monkeypatch.setattr("google.oauth2.credentials.Credentials", fake_credentials_cls)
+    monkeypatch.setattr("googleapiclient.discovery.build", lambda *a, **k: "SERVICE")
+    assert er._gmail_service("creds.json", str(token)) == "SERVICE"
+    fake_credentials_cls.from_authorized_user_file.assert_called_once()
+
+
+def test_gmail_service_missing_credentials_raises(monkeypatch, tmp_path):
+    monkeypatch.setattr("google.oauth2.credentials.Credentials", MagicMock())
+    monkeypatch.setattr("google_auth_oauthlib.flow.InstalledAppFlow", MagicMock())
+    monkeypatch.setattr("google.auth.transport.requests.Request", MagicMock())
+    with pytest.raises(FileNotFoundError):
+        er._gmail_service(str(tmp_path / "nope.json"), str(tmp_path / "absent.json"))
+
+
+def test_gmail_service_runs_oauth_flow_and_caches_token(monkeypatch, tmp_path):
+    creds_file = tmp_path / "credentials.json"
+    creds_file.write_text("{}")
+    token_file = tmp_path / "token.json"  # does not exist yet
+    new_creds = MagicMock()
+    new_creds.to_json.return_value = "{}"
+    flow = MagicMock()
+    flow.run_local_server.return_value = new_creds
+    fake_flow_cls = MagicMock()
+    fake_flow_cls.from_client_secrets_file.return_value = flow
+    monkeypatch.setattr("google.oauth2.credentials.Credentials", MagicMock())
+    monkeypatch.setattr("google_auth_oauthlib.flow.InstalledAppFlow", fake_flow_cls)
+    monkeypatch.setattr("google.auth.transport.requests.Request", MagicMock())
+    monkeypatch.setattr("googleapiclient.discovery.build", lambda *a, **k: "SVC")
+    assert er._gmail_service(str(creds_file), str(token_file)) == "SVC"
+    assert token_file.exists()
+    flow.run_local_server.assert_called_once()
+
+
+def test_gmail_service_refreshes_expired_token(monkeypatch, tmp_path):
+    token_file = tmp_path / "token.json"
+    token_file.write_text("{}")
+    expired = MagicMock(valid=False, expired=True, refresh_token="r")
+    expired.to_json.return_value = "{}"
+    fake_credentials_cls = MagicMock()
+    fake_credentials_cls.from_authorized_user_file.return_value = expired
+    monkeypatch.setattr("google.oauth2.credentials.Credentials", fake_credentials_cls)
+    monkeypatch.setattr("google.auth.transport.requests.Request", MagicMock())
+    monkeypatch.setattr("googleapiclient.discovery.build", lambda *a, **k: "SVC")
+    assert er._gmail_service("creds.json", str(token_file)) == "SVC"
+    expired.refresh.assert_called_once()
