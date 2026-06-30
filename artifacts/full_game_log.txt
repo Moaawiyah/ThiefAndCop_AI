@@ -1,0 +1,126 @@
+
+--- Sub-game 1 (start cop=(4, 0) thief=(0, 2)) ---
+  [ 1] THIEF says: "All quiet here. I'm staying light on my feet and keeping my options open." -> {'type': 'move', 'action': 'W'}
+       COP   says: "I'm sweeping the board methodically; you can't hide for long." -> {'type': 'move', 'action': 'NE'}
+  [ 2] THIEF says: "All quiet here. I'm staying light on my feet and keeping my options open." -> {'type': 'move', 'action': 'W'}
+       COP   says: "I'm sweeping the board methodically; you can't hide for long." -> {'type': 'move', 'action': 'E'}
+  [ 3] THIEF says: "All quiet here. I'm staying light on my feet and keeping my options open." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I'm sweeping the board methodically; you can't hide for long." -> {'type': 'move', 'action': 'NW'}
+  [ 4] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'E'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'NE'}
+  [ 5] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+  [ 6] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'NE'}
+  [ 7] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+  [ 8] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'NE'}
+  [ 9] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+  [10] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'NE'}
+  [11] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+  [12] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'NE'}
+  [13] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+  [14] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'NE'}
+  [15] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+  [16] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'NE'}
+  [17] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+  [18] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'NE'}
+  [19] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+  [20] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'NE'}
+  [21] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+  [22] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'NE'}
+  [23] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+  [24] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'NE'}
+  [25] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+  >> thief survived 25 moves -> thief wins
+
+--- Sub-game 2 (start cop=(4, 3) thief=(4, 0)) ---
+  [ 1] THIEF says: "All quiet here. I'm staying light on my feet and keeping my options open." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I'm sweeping the board methodically; you can't hide for long." -> {'type': 'move', 'action': 'NW'}
+  [ 2] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'W'}
+  [ 3] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+       >> capture! cop landed on thief at (4, 0)
+
+--- Sub-game 3 (start cop=(2, 3) thief=(4, 0)) ---
+  [ 1] THIEF says: "All quiet here. I'm staying light on my feet and keeping my options open." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I'm sweeping the board methodically; you can't hide for long." -> {'type': 'move', 'action': 'SW'}
+  [ 2] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'W'}
+  [ 3] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+       >> capture! cop landed on thief at (4, 0)
+
+--- Sub-game 4 (start cop=(0, 0) thief=(2, 3)) ---
+  [ 1] THIEF says: "All quiet here. I'm staying light on my feet and keeping my options open." -> {'type': 'move', 'action': 'E'}
+       COP   says: "I'm sweeping the board methodically; you can't hide for long." -> {'type': 'move', 'action': 'SE'}
+  [ 2] THIEF says: "All quiet here. I'm staying light on my feet and keeping my options open." -> {'type': 'move', 'action': 'S'}
+       COP   says: "I'm sweeping the board methodically; you can't hide for long." -> {'type': 'move', 'action': 'S'}
+  [ 3] THIEF says: "All quiet here. I'm staying light on my feet and keeping my options open." -> {'type': 'move', 'action': 'S'}
+       COP   says: "I'm sweeping the board methodically; you can't hide for long." -> {'type': 'move', 'action': 'NE'}
+  [ 4] THIEF says: "All quiet here. I'm staying light on my feet and keeping my options open." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I'm sweeping the board methodically; you can't hide for long." -> {'type': 'move', 'action': 'SE'}
+  [ 5] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'W'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+  [ 6] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'NE'}
+  [ 7] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'S'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SE'}
+  [ 8] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'S'}
+       >> capture! cop landed on thief at (4, 4)
+
+--- Sub-game 5 (start cop=(0, 4) thief=(3, 2)) ---
+  [ 1] THIEF says: "All quiet here. I'm staying light on my feet and keeping my options open." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I'm sweeping the board methodically; you can't hide for long." -> {'type': 'move', 'action': 'SW'}
+  [ 2] THIEF says: "All quiet here. I'm staying light on my feet and keeping my options open." -> {'type': 'move', 'action': 'W'}
+       COP   says: "I'm sweeping the board methodically; you can't hide for long." -> {'type': 'move', 'action': 'S'}
+  [ 3] THIEF says: "All quiet here. I'm staying light on my feet and keeping my options open." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I'm sweeping the board methodically; you can't hide for long." -> {'type': 'move', 'action': 'SW'}
+  [ 4] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'W'}
+  [ 5] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+       >> capture! cop landed on thief at (4, 0)
+
+--- Sub-game 6 (start cop=(1, 4) thief=(4, 4)) ---
+  [ 1] THIEF says: "All quiet here. I'm staying light on my feet and keeping my options open." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I'm sweeping the board methodically; you can't hide for long." -> {'type': 'move', 'action': 'SW'}
+  [ 2] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'W'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SW'}
+  [ 3] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'NE'}
+  [ 4] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'S'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'SE'}
+  [ 5] THIEF says: "I spotted you, so I'm slipping away the other direction." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I have eyes on you and I'm closing the distance fast." -> {'type': 'move', 'action': 'S'}
+       >> capture! cop landed on thief at (4, 4)
+
+===== SERIES COMPLETE =====
+  sub-game 1: winner=thief moves=25 cop=5 thief=10
+  sub-game 2: winner=cop   moves=3  cop=20 thief=5
+  sub-game 3: winner=cop   moves=3  cop=20 thief=5
+  sub-game 4: winner=cop   moves=8  cop=20 thief=5
+  sub-game 5: winner=cop   moves=5  cop=20 thief=5
+  sub-game 6: winner=cop   moves=5  cop=20 thief=5
+  TOTALS -> cop=105 thief=35
+  LLM (Ollama) active: False

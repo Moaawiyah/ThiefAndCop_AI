@@ -33,12 +33,17 @@ class StartConfig:
 
 
 @dataclass
-class OllamaConfig:
-    """Local/remote Ollama backend settings (Approach 2)."""
+class LLMConfig:
+    """Cloud LLM backend settings (Approach 1 — public GLM API, OpenAI-compatible).
 
-    model: str = "llama3.1"
-    base_url: str = "http://127.0.0.1:11434"
-    auth_header: str = ""
+    The API key is read from ``api_key`` below or, when empty, from the
+    ``GLM_API_KEY`` environment variable. Keep the key OUT of committed config;
+    prefer the env var.
+    """
+
+    model: str = "glm-4.7-flashx"
+    base_url: str = "https://api.z.ai/api/paas/v4"
+    api_key: str = ""
     enabled: bool = False
 
 
@@ -90,7 +95,7 @@ class Config:
 
     scoring: Scoring = field(default_factory=Scoring)
     start: StartConfig = field(default_factory=StartConfig)
-    ollama: OllamaConfig = field(default_factory=OllamaConfig)
+    llm: LLMConfig = field(default_factory=LLMConfig)
     mcp: MCPConfig = field(default_factory=MCPConfig)
     qlearning: QLearningConfig = field(default_factory=QLearningConfig)
     report: ReportConfig = field(default_factory=ReportConfig)

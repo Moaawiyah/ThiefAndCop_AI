@@ -24,12 +24,14 @@ start:
   thief: random
   min_initial_distance: 3  # keep agents apart at start (> vision_radius for stage 3/4 sanity)
 
-# --- LLM backend (Approach 2: local Ollama, optionally tunneled) ---
-ollama:
-  model: llama3.1
-  base_url: http://127.0.0.1:11434
-  auth_header: ""         # set when accessed through an authenticated tunnel
-  enabled: false          # Phase 5 toggles NL layer on; heuristic/Q play works without it
+# --- LLM backend (Approach 1: public GLM cloud API, OpenAI-compatible) ---
+# The API key is read from `api_key` below, or (preferred) from the GLM_API_KEY
+# env var when api_key is empty. Keep secrets OUT of this committed file.
+llm:
+  model: qwen2.5:7b
+  base_url: http://localhost:11434/v1   # local Ollama (OpenAI-compatible endpoint)
+  api_key: "ollama"       # Ollama ignores the key, but the client needs a non-empty value
+  enabled: true           # real local NL via Ollama; falls back to templates if unreachable
 
 # --- MCP servers (two separate servers, §5) ---
 mcp:
@@ -58,5 +60,5 @@ report:
   group_name: "Team-Name"
   students: []
   github_repo: ""
-  cop_mcp_url: ""
-  thief_mcp_url: ""
+  cop_mcp_url: "https://suse-cabinet-freeze-president.trycloudflare.com/mcp"
+  thief_mcp_url: "https://oriented-cdt-overview-richards.trycloudflare.com/mcp"

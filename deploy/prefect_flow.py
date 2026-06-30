@@ -60,10 +60,19 @@ def deploy_flow(role: str = "cop") -> None:
 def main():
     p = argparse.ArgumentParser(description="Prefect MCP deployment scaffold")
     p.add_argument("--role", choices=["cop", "thief"], default="cop")
+    p.add_argument("--serve", action="store_true",
+                    help="register a live Prefect Cloud deployment (no work "
+                         "pool needed) instead of just running the flow once")
     args = p.parse_args()
     if not _PREFECT_OK:
         print("prefect not installed; running the server without Prefect wrapping.")
-    deploy_flow(args.role)
+        deploy_flow(args.role)
+        return
+    if args.serve:
+        deploy_flow.serve(name=f"{args.role}-mcp-server",
+                           parameters={"role": args.role})
+    else:
+        deploy_flow(args.role)
 
 
 if __name__ == "__main__":

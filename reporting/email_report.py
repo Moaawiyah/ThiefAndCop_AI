@@ -23,7 +23,7 @@ import base64
 import os
 import sys
 from email.mime.text import MIMEText
-from typing import List, Optional
+from typing import List
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

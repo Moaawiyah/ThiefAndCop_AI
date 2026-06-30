@@ -29,7 +29,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.config import load_config
 from core.engine import GameEngine
 from agents.policy import build_policy
-from llm.ollama_client import OllamaClient
+from llm.glm_client import LLMClient
 from gui.render import _PYGAME_OK, BoardRenderer, pygame
 
 
@@ -52,7 +52,7 @@ class Visualizer:
         self.engine = GameEngine(config, rng=random.Random(7))
         self.cop_policy = build_policy("cop", config)
         self.thief_policy = build_policy("thief", config)
-        self.llm = OllamaClient(config.ollama)
+        self.llm = LLMClient(config.llm)
 
         self.cop_msg = ""
         self.thief_msg = ""

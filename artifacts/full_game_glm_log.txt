@@ -1,0 +1,176 @@
+
+--- Sub-game 1 (start cop=(2, 0) thief=(4, 4)) ---
+  [ 1] THIEF says: "I'm holding a tight position in the shadows. Watch your back, the target could appear anywhere." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I'm sweeping the west sector to flush him out. I'll signal as soon as I spot him." -> {'type': 'move', 'action': 'E'}
+  [ 2] THIEF says: "I'm staying low in the shadows near the eastern edge. Stay put, I don't want to spook him." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I have eyes on the thief near the center. I'm pushing through the open ground to cut off his escape route to the east." -> {'type': 'move', 'action': 'NE'}
+  [ 3] THIEF says: "I'm miles away from that noise; you must be looking at a ghost." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "My sensors are locked onto a heartbeat two steps east of the center. You are too far away to intercept; I have this cornered." -> {'type': 'move', 'action': 'SE'}
+  [ 4] THIEF says: "I hear you, but I'm already halfway across the map to the north-west. Don't bother chasing me; I'll be gone before you even turn around." -> {'type': 'move', 'action': 'W'}
+       COP   says: "Your distance is irrelevant. I am closing the gap now." -> {'type': 'move', 'action': 'SW'}
+  [ 5] THIEF says: "I am not running; I am just making sure I don't get boxed in. You'll never catch me if you can't predict where I'm going." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "You're bluffing, but I see you're moving toward the eastern corridor. I'm closing the gap from the west." -> {'type': 'move', 'action': 'NE'}
+  [ 6] THIEF says: "I'm actually heading south to lose your scent. You're too slow; you'll never catch me in the maze." -> {'type': 'move', 'action': 'S'}
+       COP   says: "You are heading into a tight choke point. Your scent is fresh, and I am closing the gap from the east." -> {'type': 'move', 'action': 'SE'}
+  [ 7] THIEF says: "I'm just scouting the perimeter. You're chasing a ghost." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I sense him moving fast toward the open eastern sector. You can watch the walls while I cut off his escape routes." -> {'type': 'move', 'action': 'S'}
+       >> capture! cop landed on thief at (4, 4)
+
+--- Sub-game 2 (start cop=(1, 4) thief=(0, 0)) ---
+  [ 1] THIEF says: "I am already deep in the shadows of the northwest corner, far from those walls. You are barking up the wrong sector, so keep your eyes on the east." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I'm sweeping the eastern perimeter to flush you out from your shadows. Your tactical distraction won't save you when I cut off your escape routes." -> {'type': 'move', 'action': 'SW'}
+  [ 2] THIEF says: "I'm slipping through the cracks while you chase shadows on the wrong side of the map. You'll be staring at empty space while I circle behind you." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "You talk a big game, but I've already cut off your escape routes to the south. Get ready, I'm taking you down now." -> {'type': 'move', 'action': 'SW'}
+  [ 3] THIEF says: "I see through your bluff. I'm already far ahead of your southern line." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I'm cutting off the eastern exit while your attention is on the south. You can't outrun me on a grid." -> {'type': 'move', 'action': 'NW'}
+  [ 4] THIEF says: "I'm not heading anywhere near the east; I've already slipped past the perimeter. You're chasing shadows while the real prize is right under your nose." -> {'type': 'move', 'action': 'E'}
+       COP   says: "I see you hiding to the north. I'll cut off your escape route and corner you here." -> {'type': 'move', 'action': 'NE'}
+  [ 5] THIEF says: "You're too slow. I'm already on the other side of the map." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I smell your panic from here. I'm closing the gap now." -> {'type': 'move', 'action': 'SW'}
+  [ 6] THIEF says: "I'm not panicked; I'm just stalling for time. You're wasting your breath on a ghost." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "The thief is already north of me. I'll cut off his retreat before he can reach the safe zone." -> {'type': 'move', 'action': 'NE'}
+  [ 7] THIEF says: "You're dreaming if you think you can corner me. I'm already headed for the shadows east of your patrol." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I see you heading east, but the shadows won't hide you forever. I'll cut you off before you reach the edge." -> {'type': 'move', 'action': 'SW'}
+  [ 8] THIEF says: "I'm just taking a stroll in the park. Don't worry, I won't stay in one spot long enough to get caught." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "Your stroll ends here. I have you in my sights and am closing in from the west." -> {'type': 'move', 'action': 'NE'}
+  [ 9] THIEF says: "I am nowhere near the west; I am actually moving away from you toward the center. You'll never catch me if you keep guessing the wrong direction." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I have a clear line of sight to your level and to the west. I'm moving directly toward you, not guessing." -> {'type': 'move', 'action': 'SW'}
+  [10] THIEF says: "I'm heading east toward the northern high ground to lose your scent. Don't get your hopes up; I'm just as blind as you are." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "Your scent is already gone, fool. I can see you clearly on the high ground; prepare to be cut off." -> {'type': 'move', 'action': 'NE'}
+  [11] THIEF says: "My tracks are long cold, old timer. I’m just a whisper on the wind before the storm breaks." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "Wind is cold, but the net is tightening. I see you running toward the west." -> {'type': 'move', 'action': 'SW'}
+  [12] THIEF says: "I've seen you coming from the east. You're just chasing shadows out there." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I know exactly where you are hiding in the shadows. Come out and face the capture, thief." -> {'type': 'move', 'action': 'NE'}
+  [13] THIEF says: "I'm not hiding in shadows; I'm just enjoying the view. And I'm not going anywhere near you." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I see you. My path is clear." -> {'type': 'move', 'action': 'SW'}
+  [14] THIEF says: "My sensors are blind to your position, so you must be imagining things. I am heading deep into the shadows to lose you." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I am closing the distance from the west while you hide in the shadows; you cannot escape the net I am spreading. I will flush you out before the sun sets." -> {'type': 'move', 'action': 'NE'}
+  [15] THIEF says: "My shadow stretches long in the north, but your net is far too slow to catch me before I claim the prize." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "Your shadow may be long, but I am closing the distance. Your prize is already mine." -> {'type': 'move', 'action': 'SW'}
+  [16] THIEF says: "My shadow is short and I am already far away. You will never catch me here." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "You are weaving, but I am closing the gap. Your shadow is mine." -> {'type': 'move', 'action': 'NE'}
+  [17] THIEF says: "My shadow is long, but my path is always twisting. I'll be long gone before you even think about turning." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "Your shadow is a poor guide. I have the line of sight and I am closing it." -> {'type': 'move', 'action': 'SW'}
+  [18] THIEF says: "You are wasting your breath on shadows. I'm already moving away from your line of sight." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I see you, thief. You won't escape the grid." -> {'type': 'move', 'action': 'NE'}
+  [19] THIEF says: "I’m just a harmless wanderer, not a thief. You’re looking in the wrong direction." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "You're bluffing, wanderer. My sensors show the thief is exactly where I am looking, and you're the only obstacle between me and the capture." -> {'type': 'move', 'action': 'SW'}
+  [20] THIEF says: "My sensors are picking up a heat signature to the north, not down here. You're chasing shadows while I'm circling the target." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I sense the heat signature exactly where I am looking. I will cut off the thief's path before they can circle." -> {'type': 'move', 'action': 'NE'}
+  [21] THIEF says: "I am nowhere near your location; I have been circling the perimeter in the northern sector. You are chasing a ghost while I slip toward the prize on the other side of the board." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I see you and I'm cutting you off before you reach the northern perimeter. I'll catch you before you slip toward the prize." -> {'type': 'move', 'action': 'SW'}
+  [22] THIEF says: "You can try to cut me off, but I'm already heading straight for the prize. You're wasting your breath running north when the goods are this close." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "You're moving fast, but I've got the better angle. I'm shifting to intercept you before you reach the loot." -> {'type': 'move', 'action': 'NE'}
+  [23] THIEF says: "I'm not heading for the loot; I'm just checking the perimeter. You'll never find me if you keep guessing the wrong quadrant." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I've got you pinned near the western edge. Your perimeter patrol ends the moment I cut off your escape route." -> {'type': 'move', 'action': 'SW'}
+  [24] THIEF says: "I'm nowhere near the edge; I'm moving deeper into the shadows to throw off your pursuit." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I see right through your shadows; you have nowhere left to run from my sight. Prepare to be cornered in this sector." -> {'type': 'move', 'action': 'NE'}
+  [25] THIEF says: "Your shadows are just tricks of the light. I'm moving through the open ground, away from your reach." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I see right through your tricks. I'm cutting off your exit to the west." -> {'type': 'move', 'action': 'SW'}
+  >> thief survived 25 moves -> thief wins
+
+--- Sub-game 3 (start cop=(4, 0) thief=(1, 3)) ---
+  [ 1] THIEF says: "You can try to stop me, but I'm already two steps ahead. Watch my shadow; I'm slipping away toward the center." -> {'type': 'move', 'action': 'N'}
+       COP   says: "The shadows don't fool me; I'm already cutting off your path to the center. You're running in circles while I close the distance." -> {'type': 'move', 'action': 'NE'}
+  [ 2] THIEF says: "I'm not running in circles, I'm just picking up the scent before you even know where I am. You're barking up the wrong tree." -> {'type': 'move', 'action': 'E'}
+       COP   says: "I hear you, but your scent is getting stronger by the second. I'm cutting off the sectors to the north and east, and you won't escape this grid." -> {'type': 'move', 'action': 'E'}
+  [ 3] THIEF says: "My scent is just the wind, and I've already slipped into the shadows to the southeast. You're wasting your breath chasing ghosts while I slip past your line of sight." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "Your shadows won't save you from my calculated perimeter sweep. I can already feel the disturbance on the eastern edge, and I'm tightening the net." -> {'type': 'move', 'action': 'NW'}
+  [ 4] THIEF says: "My disturbance is a phantom; I've already slipped past the eastern net to circle wide. Keep hunting the shadows you think you see, because my real location is a ghost you can't touch." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I feel your phantom pulse but I'm cutting off the perimeter to trap you in the open. Your shadows won't save you; I'm closing the net from the west." -> {'type': 'move', 'action': 'NE'}
+  [ 5] THIEF says: "I see the shadows stretching toward me, but the open ground is a trap I won't fall into. I'll vanish into the maze before your net tightens." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "Your shadows are illusions; I see you running north-east. The net tightens now." -> {'type': 'move', 'action': 'NE'}
+  [ 6] THIEF says: "I'm just a ghost fading into the mist, and your net is a mirage." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "The mist clears when I close the distance. I see you, and you're running out of shadows to hide in." -> {'type': 'move', 'action': 'E'}
+       >> capture! cop landed on thief at (0, 4)
+
+--- Sub-game 4 (start cop=(3, 4) thief=(1, 1)) ---
+  [ 1] THIEF says: "The shadows are deep in this sector, and I’m not running from anything. You're chasing ghosts in the wrong part of town." -> {'type': 'move', 'action': 'NW'}
+       COP   says: "The shadows are a mask for movement, thief. You can't hide forever in the dark." -> {'type': 'move', 'action': 'NW'}
+  [ 2] THIEF says: "The shadows are my ally, not my prison. Watch the horizon closely." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I see you hiding in the shadows, but you cannot escape the net I am weaving. I am tightening the noose around this sector to corner you before you can slip away." -> {'type': 'move', 'action': 'SW'}
+  [ 3] THIEF says: "Your net is getting tighter, but I am a ghost that cannot be caught. You are wasting your time chasing shadows that don't exist." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "My sensors show you're still moving; a ghost cannot run forever. I will keep the pressure on until you have nowhere left to hide." -> {'type': 'move', 'action': 'NW'}
+  [ 4] THIEF says: "You're wasting energy tracking a phantom. I’m already a mile past your position." -> {'type': 'move', 'action': 'E'}
+       COP   says: "Your phantom is already past me, but it's running out of room. I see you, and the chase ends now." -> {'type': 'move', 'action': 'NE'}
+  [ 5] THIEF says: "You're dreaming. I've been circling the perimeter the whole time." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I see you on the perimeter. I'm cutting off the western exit to end this game." -> {'type': 'move', 'action': 'SW'}
+  [ 6] THIEF says: "I'm circling the center, away from the perimeter. You're wasting your time on the edges." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I see you clearly on the far side of the map, but I’m cutting off your path to the north before you can escape. My move is made, and you have nowhere to run." -> {'type': 'move', 'action': 'NE'}
+  [ 7] THIEF says: "You’re moving too fast for me to see clearly, and I’m just setting up a diversion to the north. You’ll be surprised where I actually turn up." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I sense your diversion; I'll sweep the northern sector while cutting off your retreat to the west. You can run, but I'm closing the perimeter." -> {'type': 'move', 'action': 'SW'}
+  [ 8] THIEF says: "My diversion is far from the northern sector. I'm heading east, so the perimeter is already closed." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "The thief is directly north of me. I will seal the northern exit and trap him." -> {'type': 'move', 'action': 'NE'}
+  [ 9] THIEF says: "I'm heading south to shake you off. You'll find nothing but empty space up here." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I see you running. You won't escape me this time." -> {'type': 'move', 'action': 'SW'}
+  [10] THIEF says: "You think you can corner me. I'm already slipping away while you're still spinning in circles." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I am already blocking your northern exit. You will be trapped before you take another step." -> {'type': 'move', 'action': 'NE'}
+  [11] THIEF says: "I've already slipped past your northern flank. I'm heading deep into the shadows to the south." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I see you slipping away. I'll cut off your escape route to the southwest." -> {'type': 'move', 'action': 'SW'}
+  [12] THIEF says: "That sounds like a bluff; I'm actually heading due south to confuse you. You're chasing shadows while I slip away to the east." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "Your diversion won't work; I'm already cutting off the eastern path to corner you here." -> {'type': 'move', 'action': 'NE'}
+  [13] THIEF says: "I’m already deep in the shadows near the water. Your eastern trap is a bluff; I’m slipping past you." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I've tracked your movement west. The shadows can't hide you when I close the distance." -> {'type': 'move', 'action': 'SW'}
+  [14] THIEF says: "I am merely a shadow in the mist, drifting north to lose your trail before circling back. Don't waste your breath hunting ghosts when the real prize lies waiting for me to the south." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "The shadow runs north, but the north is a dead end. I am closing the net from the south and will cut you off before you circle back." -> {'type': 'move', 'action': 'NE'}
+  [15] THIEF says: "My path leads away from the perimeter, so your shadow is chasing the wind. The net will snap shut long before I circle back to that dead end." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "My pursuit cuts off his escape routes from the perimeter. I will tighten the net and close the distance." -> {'type': 'move', 'action': 'SW'}
+  [16] THIEF says: "You are clearly boxed in. I will circle wide to keep you guessing." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I sense your wide maneuver, but my perimeter is secure. I am closing in from the north to trap you." -> {'type': 'move', 'action': 'NE'}
+  [17] THIEF says: "My wide maneuvers are just to ensure I don't get cornered by your trap. You are wasting your breath coming from the north when my escape is to the southeast." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I see you heading southeast, but I have the north covered. You won't reach the open ground before I cut you off." -> {'type': 'move', 'action': 'SW'}
+  [18] THIEF says: "I’m not heading southeast. I’m actually heading north to loop around and catch you off guard." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I'm cutting off that route. Expect me to intercept you from the west." -> {'type': 'move', 'action': 'NE'}
+  [19] THIEF says: "You think you can cut me off. I'm heading toward the city lights." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I see you heading into the shadows. I'm cutting through the alley to cut you off before you reach the lights." -> {'type': 'move', 'action': 'SW'}
+  [20] THIEF says: "You're too slow for a ghost. I'm already miles away." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I see you moving north. My pursuit is relentless." -> {'type': 'move', 'action': 'NE'}
+  [21] THIEF says: "I'm actually circling west, trying to lose you in the shadows. You're barking up the wrong tree." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "You are wasting your breath. I am cutting off the western corridor, and the shadows won't save you." -> {'type': 'move', 'action': 'SW'}
+  [22] THIEF says: "I see you trying to box me in, but shadows are everywhere. You're chasing ghosts while I slip away to the heart of the city." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "You can run, but shadows won't save you from the net closing around the city center. I've already cut off the northern passage, and you have nowhere left to go." -> {'type': 'move', 'action': 'NE'}
+  [23] THIEF says: "The shadows are my only friend here, and the city center is just a trap waiting to spring. You can hold your perimeter, but I'll slip through the cracks you left behind." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "Your shadows won't hide you from me. I see you west of my position, and I'm closing the gap." -> {'type': 'move', 'action': 'SW'}
+  [24] THIEF says: "I don't smell you near the perimeter. I'm heading for the loot in the southeast corner." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "I can see you clearly to the north. My trap is already set, and you're walking right into it." -> {'type': 'move', 'action': 'NE'}
+  [25] THIEF says: "I hear the wind whistling, but you won't catch me that easily." -> {'type': 'move', 'action': 'SW'}
+       COP   says: "I see you clear as day, standing still while I approach from the west. Your little game is over the moment I close the distance." -> {'type': 'move', 'action': 'SW'}
+  >> thief survived 25 moves -> thief wins
+
+--- Sub-game 5 (start cop=(1, 1) thief=(2, 4)) ---
+  [ 1] THIEF says: "I haven't budged from my spot in the shadows. You're wasting your breath chasing a ghost." -> {'type': 'move', 'action': 'S'}
+       COP   says: "The shadows can't hide him forever. I'll flush him out and close the net." -> {'type': 'move', 'action': 'S'}
+  [ 2] THIEF says: "The shadows are shifting, and I'm already ten steps ahead of your net. You can chase ghosts if you like, but you'll only find empty air." -> {'type': 'move', 'action': 'S'}
+       COP   says: "I know you are moving, but the geometry of the grid limits your retreat. I am closing the sector from the west, so you won't escape the trap." -> {'type': 'move', 'action': 'NE'}
+  [ 3] THIEF says: "I’m not running from a trap that isn't laid yet. Watch the horizon; I might just be walking right into your jaws." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "My sensors are still scanning the northern sector. I’m closing the gap regardless of what you think you see." -> {'type': 'move', 'action': 'SE'}
+  [ 4] THIEF says: "You can circle around all you want; I’ve already slipped away to the other side of the city." -> {'type': 'move', 'action': 'W'}
+       COP   says: "I see you trying to slip away, but my path is already blocked. I’m cutting off your escape route to the west." -> {'type': 'move', 'action': 'SW'}
+  [ 5] THIEF says: "You're bluffing; you're actually blocking the east. I'm heading north to flush you out." -> {'type': 'move', 'action': 'NE'}
+       COP   says: "That's a brave move heading north, but you're walking right into a pincer. I'm cutting off the east side to trap you." -> {'type': 'move', 'action': 'NE'}
+  [ 6] THIEF says: "I see you think you've cornered me, but I've already slipped east. You're wasting your time chasing shadows." -> {'type': 'move', 'action': 'S'}
+       COP   says: "My shadow is a decoy; I am already cutting off your eastern exit. The game ends when you have nowhere left to run." -> {'type': 'move', 'action': 'SE'}
+  [ 7] THIEF says: "I see your shadow, but you can't block every path. I'm slipping past you before you realize I've moved." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I see the shadow you're leaving behind. I am already in position to cut off your escape route." -> {'type': 'move', 'action': 'S'}
+       >> capture! cop landed on thief at (4, 4)
+
+--- Sub-game 6 (start cop=(1, 4) thief=(4, 0)) ---
+  [ 1] THIEF says: "I'm not leaving any trail for you to follow. I'm taking a deep breath and melting into the shadows." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I see through your bluff. I am sweeping the northeast quadrant to flush you out." -> {'type': 'move', 'action': 'SW'}
+  [ 2] THIEF says: "You'll never corner me here. I'm moving deeper into the shadows, far away from your sweep." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I sense you moving deeper into the shadows. I'm expanding my sweep to cut off your escape routes." -> {'type': 'move', 'action': 'SW'}
+  [ 3] THIEF says: "You're wasting your time in the shadows; I'm already far beyond your reach." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "Heh. I'm not playing a game of reach; I'm playing a game of patience." -> {'type': 'move', 'action': 'W'}
+  [ 4] THIEF says: "I prefer games of patience too, but I'm going to need a little patience of my own to get where I'm going." -> {'type': 'move', 'action': 'stay'}
+       COP   says: "I see you heading south; I'll cut you off to the west and squeeze you into the corner." -> {'type': 'move', 'action': 'SW'}
+       >> capture! cop landed on thief at (4, 0)
+
+===== SERIES COMPLETE =====
+  sub-game 1: winner=cop   moves=7  cop=20 thief=5
+  sub-game 2: winner=thief moves=25 cop=5 thief=10
+  sub-game 3: winner=cop   moves=6  cop=20 thief=5
+  sub-game 4: winner=thief moves=25 cop=5 thief=10
+  sub-game 5: winner=cop   moves=7  cop=20 thief=5
+  sub-game 6: winner=cop   moves=4  cop=20 thief=5
+  TOTALS -> cop=90 thief=40
+  LLM (GLM) active: True

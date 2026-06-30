@@ -28,7 +28,11 @@ def legal_mask(qtable: QTable, engine: GameEngine, self_pos, barriers_left: int)
     legal_moves = set(engine.grid.legal_moves(self_pos))
     for i, a in enumerate(qtable.actions):
         if a == "barrier":
-            mask[i] = qtable.role == "cop" and barriers_left > 0
+            mask[i] = (
+                qtable.role == "cop"
+                and barriers_left > 0
+                and not engine.grid.is_barrier(self_pos)
+            )
         else:
             mask[i] = a in legal_moves
     if not mask.any():

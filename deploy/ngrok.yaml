@@ -1,15 +1,16 @@
-# ngrok configuration — Approach 2 (assignment §7.2).
+# ngrok configuration — Approach 2 (assignment §7.2), OPTIONAL legacy scaffold.
 #
-# Securely exposes the LOCAL Ollama daemon (127.0.0.1:11434) over HTTPS with a
-# Traffic Policy that requires Basic Auth, so only requests carrying the right
-# Authorization header reach Ollama. Ollama itself stays bound to loopback.
+# NOTE: the default LLM backend is now the public GLM cloud API (Approach 1),
+# which needs NO tunnel. This file only matters if you instead run a LOCAL
+# Ollama-compatible server and want to expose it securely over HTTPS with a
+# Traffic Policy that requires Basic Auth.
 #
 # Usage:
 #   ngrok start --config deploy/ngrok.yaml ollama
 # Then set in config.yaml:
-#   ollama.base_url: https://<your-subdomain>.ngrok-free.app
-#   ollama.auth_header: "Basic <base64(user:pass)>"
-#   ollama.enabled: true
+#   llm.base_url: https://<your-subdomain>.ngrok-free.app/v1/
+#   llm.api_key: "Basic <base64(user:pass)>"   # sent as the bearer key
+#   llm.enabled: true
 
 version: 3
 agent:

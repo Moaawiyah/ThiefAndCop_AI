@@ -57,7 +57,11 @@ class QPolicy:
         legal_moves = set(engine.grid.legal_moves(obs.self_pos))
         for i, a in enumerate(self.qtable.actions):
             if a == "barrier":
-                mask[i] = self.role == "cop" and obs.barriers_left > 0
+                mask[i] = (
+                    self.role == "cop"
+                    and obs.barriers_left > 0
+                    and not engine.grid.is_barrier(obs.self_pos)
+                )
             else:
                 mask[i] = a in legal_moves
         if not mask.any():
