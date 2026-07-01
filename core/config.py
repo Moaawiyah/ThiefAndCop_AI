@@ -41,6 +41,23 @@ def _coerce_pos(value: Any) -> Any:
     return "random"
 
 
+def _load_dotenv(path: str = ".env") -> None:
+    """Load KEY=VALUE lines from .env so secrets (e.g. GLM_API_KEY) reach the
+    LLM client from any entry point, even when the shell hasn't sourced it.
+    Existing env vars win (setdefault)."""
+    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    full = path if os.path.isabs(path) else os.path.join(here, path)
+    if not os.path.exists(full):
+        return
+    with open(full, encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            os.environ.setdefault(key.strip(), value.strip())
+
+
 def load_config(path: Optional[str] = None) -> Config:
     """Load and validate ``config.yaml`` into a :class:`Config`.
 
@@ -49,6 +66,7 @@ def load_config(path: Optional[str] = None) -> Config:
     path:
         Optional explicit path. Defaults to ``config.yaml`` next to the repo root.
     """
+    _load_dotenv()
     path = path or DEFAULT_CONFIG_PATH
     with open(path, "r", encoding="utf-8") as fh:
         raw = yaml.safe_load(fh) or {}
@@ -83,7 +101,7 @@ def load_config(path: Optional[str] = None) -> Config:
             min_initial_distance=int(start_raw.get("min_initial_distance", 3)),
         ),
         llm=LLMConfig(
-            model=str(llm_raw.get("model", "glm-4.7-flashx")),
+            model=str(llm_raw.get("model", "glm-5")),
             base_url=str(llm_raw.get("base_url", "https://api.z.ai/api/paas/v4")),
             api_key=str(llm_raw.get("api_key", "")),
             enabled=bool(llm_raw.get("enabled", False)),
@@ -107,6 +125,14 @@ def load_config(path: Optional[str] = None) -> Config:
             epsilon_decay=float(ql_raw.get("epsilon_decay", 0.9995)),
             episodes=int(ql_raw.get("episodes", 20000)),
             q_dir=str(ql_raw.get("q_dir", "artifacts")),
+            confinement_weight=float(ql_raw.get("confinement_weight", 0.15)),
+            barrier_bonus=float(ql_raw.get("barrier_bonus", 1.0)),
+            thief_freedom_weight=float(ql_raw.get("thief_freedom_weight", 0.1)),
+            barrier_requires_visible=bool(ql_raw.get("barrier_requires_visible", True)),
+            idle_penalty=float(ql_raw.get("idle_penalty", 0.15)),
+            blind_stay_prob=float(ql_raw.get("blind_stay_prob", 0.15)),
+            revisit_penalty=float(ql_raw.get("revisit_penalty", 0.15)),
+            loop_window=int(ql_raw.get("loop_window", 3)),
         ),
         report=ReportConfig(
             email_target=str(report_raw.get("email_target", "rmisegal+uoh26b@gmail.com")),

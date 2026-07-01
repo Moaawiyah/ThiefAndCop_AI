@@ -52,7 +52,13 @@ class QPolicy:
         self._last_known_opp = None
 
     def _legal_mask(self, engine: GameEngine, obs: Observation) -> np.ndarray:
-        """Boolean mask over the action list (movement legality + barrier rule)."""
+        """Boolean mask over the action list (movement legality + barrier rule).
+
+        A barrier is legal only while the thief is *currently* in vision (unless
+        the config relaxes that), so the cop walls off space as a deliberate
+        response to a seen thief rather than blindly.
+        """
+        require_visible = self.config.qlearning.barrier_requires_visible
         mask = np.zeros(self.qtable.num_actions, dtype=bool)
         legal_moves = set(engine.grid.legal_moves(obs.self_pos))
         for i, a in enumerate(self.qtable.actions):
@@ -61,12 +67,30 @@ class QPolicy:
                     self.role == "cop"
                     and obs.barriers_left > 0
                     and not engine.grid.is_barrier(obs.self_pos)
+                    and (obs.opponent_visible or not require_visible)
                 )
             else:
                 mask[i] = a in legal_moves
         if not mask.any():
             mask[:] = True
         return mask
+
+    def _suppress_idle(self, mask: np.ndarray, engine: GameEngine,
+                       obs: Observation) -> None:
+        """Drop position-preserving actions while blind, keeping >=1 action.
+
+        With the opponent out of vision, any action that leaves the agent on its
+        current cell — ``stay``, ``barrier``, or a move blocked by a wall/barrier —
+        is state-preserving: a greedy agent that picks it idles forever and never
+        closes in. Banning them forces real progress; the >=1 fallback keeps the
+        mask legal if the agent is genuinely boxed in.
+        """
+        trial = mask.copy()
+        for i, a in enumerate(self.qtable.actions):
+            if a == "barrier" or engine.grid.apply_move(obs.self_pos, a) == obs.self_pos:
+                trial[i] = False
+        if trial.any():
+            mask[:] = trial
 
     def __call__(self, obs: Observation, engine: GameEngine) -> dict:
         if not self.loaded:
@@ -82,6 +106,12 @@ class QPolicy:
 
         state = self.qtable.encode_state(self_cell, opp_cell)
         mask = self._legal_mask(engine, obs)
+        if not obs.opponent_visible:
+            # Opponent out of vision. Occasionally lurk in place (human-like);
+            # otherwise never freeze on a state-preserving action.
+            if self.qtable.rng.random() < self.config.qlearning.blind_stay_prob:
+                return {"type": "move", "action": "stay"}
+            self._suppress_idle(mask, engine, obs)
         a_idx = self.qtable.greedy_action_index(state, mask)
         action = self.qtable.actions[a_idx]
         if action == "barrier":

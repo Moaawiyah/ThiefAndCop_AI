@@ -26,18 +26,22 @@ uv sync
 uv run python3 scripts/sanity_check.py
 
 # 3. play a full 6-sub-game series OVER THE LIVE LLM (z.ai GLM)
-#    orchestrator.py auto-loads .env, so a bare run already goes over the LLM:
-uv run python3 orchestrator.py                   # networked series, verbose
+#    orchestrator.py auto-loads .env, so a bare run already goes over the LLM.
+#    It also writes an animated replay (artifacts/game_full.gif) and serves a
+#    LIVE web view by default -- open the printed http://localhost:8000 URL:
+uv run python3 orchestrator.py                   # networked series + live view + GIF
 uv run python3 orchestrator.py --inprocess       # same, no servers needed
+uv run python3 orchestrator.py --no-watch        # skip the live web view (fast, exits)
 #    confirm at the end:  "LLM (GLM) active: True | tokens used: {...non-zero...}"
 
 # 4. train the Q-Learning agents (writes Q-tables + learning curve to artifacts/)
 uv run python3 agents/train.py                  # full run (config.qlearning.episodes)
 uv run python3 agents/train.py --episodes 2000  # fast smoke test
 
-# 5. launch the GUI (live window, or headless screenshots for the report)
-uv run python3 gui/visualizer.py                 # needs a display
-uv run python3 gui/visualizer.py --headless      # renders frames to artifacts/
+# 5. watch the game (choose one)
+uv run python3 gui/live_server.py                # browser view at http://localhost:8000
+uv run python3 gui/visualizer.py                 # native Pygame window (needs a display)
+uv run python3 gui/visualizer.py --headless      # headless -> artifacts/game_full.gif
 
 # 6. produce the JSON report (dry-run prints the schema-valid Internal Game JSON)
 uv run python3 reporting/email_report.py --dry-run
@@ -50,7 +54,7 @@ Package management is **uv-only**: dependencies live in `pyproject.toml`, pinned
 in `uv.lock`. There is no `requirements.txt`.
 
 **The game runs over a real LLM.** The configured backend is the **z.ai GLM
-cloud API** (`glm-4.7-flashx`, OpenAI-compatible) in `config.yaml`. The API key
+cloud API** (`glm-5`, OpenAI-compatible) in `config.yaml`. The API key
 is read from `GLM_API_KEY` — copy `.env.example` to `.env` and fill it in (the
 `.env` file is gitignored and must never be committed). Because `config.yaml`
 leaves `llm.api_key` empty, the client falls back to that env var.
@@ -104,9 +108,10 @@ hw6/
     policies.py            # heuristic baseline policies (distance/random)
   agents/
     qlearning.py           # numpy Q-table, state encoding, eps-greedy, Bellman
-    train.py               # self-play training -> q_*.npy + learning curve CSV/PNG
-    train_utils.py         # reward shaping, eval, curve/CSV/PNG writers
-    policy.py              # Q-policy with last-known-opponent belief tracking
+    train.py               # self-play training loop -> q_*.npy + learning curve
+    turn.py                # one self-play turn: mask + shaping + Bellman update
+    train_utils.py         # reward shaping, legal mask, eval, curve/CSV writers
+    policy.py              # Q-policy: belief tracking, barrier gate, blind-lurk
   llm/
     glm_client.py          # fault-tolerant OpenAI-compatible LLM client (z.ai GLM by default; graceful degradation)
     prompts.py             # NL system/turn prompts (generate + parse)
@@ -120,10 +125,14 @@ hw6/
     bus.py                 # InProcessBus / NetworkedBus transports
     orchestrator_runner.py # the turn loop driving both agents over a bus
     run_logging.py         # structured per-run orchestrator logs -> artifacts/logs
-  orchestrator.py          # MCP CLIENT entrypoint: owns LLM + dialogue + game loop (auto-loads .env)
+  orchestrator.py          # MCP CLIENT entrypoint: LLM + dialogue + game loop + live view (auto-loads .env)
   gui/
     visualizer.py          # Pygame real-time grid (headless-safe)
     render.py              # pure frame-drawing helpers (testable, no I/O)
+    animate.py             # buffers frames -> artifacts/game_full.gif (Pillow)
+    series_gif.py          # per-turn frame recorder + live snapshot provider
+    live_game.py           # background game runner for the live web view
+    live_server.py         # stdlib HTTP server: live board + NL chat in the browser
   reporting/
     report_schema.py       # Internal Game JSON + Bonus JSON
     email_report.py        # Gmail API (OAuth) sender; dry-run by default
@@ -131,9 +140,9 @@ hw6/
     ngrok.yaml             # optional legacy scaffold: secure local-LLM tunnel
     prefect_flow.py        # Prefect Cloud deployment scaffold (Phase 7, optional)
   docs/                    # PRD.md, PLAN.md, TODO.md (requirements, plan, open items)
-  tests/                   # pytest suite (147 tests, 98% coverage)
+  tests/                   # pytest suite (169 tests, 95% coverage)
   scripts/sanity_check.py  # staged 2x2 -> 5x5 runs
-  artifacts/               # trained Q-tables, learning curves, GUI screenshots, logs
+  artifacts/               # trained Q-tables, learning curves, game_full.gif, logs
 ```
 
 ---
@@ -236,13 +245,56 @@ Tabular Q-Learning with the Bellman update (`agents/qlearning.py`):
 * **Actions:** cop = 8 moves + `stay` + `barrier`; thief = 8 moves + `stay`.
 * **Exploration:** ε-greedy with `epsilon_start=1.0`, `epsilon_decay=0.9995`,
   `epsilon_min=0.05` (all from `config.yaml`).
-* **Training:** `agents/train.py` runs cop/thief **self-play**, writes
-  `artifacts/q_cop.npy`, `artifacts/q_thief.npy`, `artifacts/learning_curve.csv`
-  and `artifacts/learning_curve.png`.
+* **Training:** `agents/train.py` runs cop/thief **self-play** (one turn each via
+  `agents/turn.py`), writing `artifacts/q_cop.npy`, `artifacts/q_thief.npy`,
+  `artifacts/learning_curve.csv` and `artifacts/learning_curve.png`.
 
-**Result (2000-episode smoke run, 5×5):** the trained cop captured the heuristic
-thief in **99%** of evaluation sub-games versus **14%** for a random cop — a clear
-win over the baseline.
+**Result (20 000-episode run, 5×5):** the trained cop beats the random baseline by a
+wide margin — capturing the heuristic thief in the **~0.90–0.99** range at the
+balanced barrier setting versus **~0.14** for a random cop. Heavier barrier
+weighting deliberately trades some capture rate for more frequent walling-off (see
+§5.1).
+
+### 5.1 Behavioral shaping — barriers & out-of-vision conduct
+
+Beyond the sparse capture/timeout reward, the shaping in `agents/train_utils.py`
+(applied through `agents/turn.py`) gives the two agents deliberate, legible tactics.
+Every parameter below lives in `config.yaml` — nothing is hard-coded.
+
+* **Strategic barriers (cop).** The `barrier` action is **legal only while the thief
+  is currently inside the vision radius** (`barrier_requires_visible`), so the cop
+  walls off space as a deliberate response to a *seen* thief and never blindly. A
+  barrier is rewarded by how much it shrinks the thief's reachable free area
+  (`confinement_weight` × cells removed) plus a flat `barrier_bonus` when it actually
+  confines; a barrier that walls off nothing is wasted and penalised like idling.
+  These two knobs set how often the cop chooses to trap versus pursue directly —
+  verified over 300 sub-games with **zero barriers ever placed while blind**.
+
+* **Conduct outside the vision radius (both agents).** With the opponent unseen there
+  is no distance signal, so shaping switches to a **search regime**: any real move
+  earns a small bonus while *not changing cell* costs `idle_penalty`. This is keyed on
+  the agent's actual position change, so a move blocked by a wall is penalised just
+  like `stay`. At inference the Q-policy suppresses these state-preserving actions
+  while blind so a greedy agent never freezes — **except** that with probability
+  `blind_stay_prob` (~15 %) it is allowed to *lurk* in place, giving a human-like
+  "wait and watch" beat without reintroducing the absorbing deadlock.
+
+* **Anti-loop (soft).** A `revisit_penalty` discourages stepping back into a cell
+  visited within the last `loop_window` turns, so an agent flees or searches new
+  ground instead of **ping-ponging between two cells to run out the clock**. It is a
+  soft nudge, not a hard ban: cells may still be revisited when that is genuinely the
+  best move. Enabling it cut observed back-and-forth 2-cycles by well over an order of
+  magnitude in self-play.
+
+| Knob (`config.qlearning`) | Role |
+|---|---|
+| `barrier_requires_visible` | gate the barrier action on the thief being in vision |
+| `confinement_weight` | reward per thief free-cell a barrier removes |
+| `barrier_bonus` | flat reward for a barrier that actually confines |
+| `idle_penalty` | cost for not changing cell while the opponent is unseen |
+| `blind_stay_prob` | chance an agent lurks (stays) on a turn its opponent is unseen |
+| `revisit_penalty` | soft cost for re-entering a recently-visited cell (anti-loop) |
+| `loop_window` | how many recent own-cells count as "recently visited" |
 
 ---
 
@@ -255,15 +307,33 @@ All artifacts are written to `artifacts/`.
 rises and the capture rate (green) converges toward ~1.0 as ε (red) decays,
 demonstrating successful learning.
 
-### 6.2 GUI screenshots
-`artifacts/gui_*.png` — real-time Pygame rendering of the grid showing the cop
-(blue **C**), the thief (red **T**), barriers, the move counter, live scores, and
-the latest NL messages from each agent. Generated headlessly with
-`python3 gui/visualizer.py --headless`.
+### 6.2 Animated replay & live web view
+The grid is rendered with the cop (blue **C**), the thief (red **T**), barriers, the
+move counter, live scores, and the latest NL messages from each agent. Two forms of
+evidence are produced (static per-frame PNG screenshots have been retired):
+
+* **Animated replay** — `artifacts/game_full.gif`, written automatically by every
+  `orchestrator.py` run and by `gui/visualizer.py --headless`.
+* **Live web view** — `orchestrator.py` serves a browser view of the *actual* MCP
+  game at **http://localhost:8000** (opt out with `--no-watch`); the board and the
+  cop/thief dialogue update every turn. `gui/live_server.py` offers the same view for
+  a standalone local game. The server is stdlib-only (`http.server`), so it adds no
+  dependencies.
+
+![Live web view — cop (C) pursuing the thief (T) with the turn-by-turn NL dialogue](screenshots/live_view.png)
+
+*Live view mid-pursuit (sub-game 2/6): the HUD shows the move counter and running
+scores while the cop and thief exchange free-text tactical messages.*
+
+![Live web view — a placed barrier (grey cell) confining the thief](screenshots/live_view_barrier.png)
+
+*Strategic barriers in action (sub-game 6/6): the cop has placed a barrier (grey
+cell) and its message calls it out — "those barriers at my side mean you're running
+out of room to maneuver" (see §5.1).*
 
 ### 6.3 CLI logs — real natural-language dialogue
-`artifacts/nl_dialogue_log.txt` — a full series run with the **live LLM (z.ai GLM `glm-4.7-flashx`)**
-enabled. Excerpt:
+`artifacts/full_game_log.md` / `artifacts/nl_dialogue_log.txt` — a full series run
+with the **live LLM (z.ai GLM `glm-5`)** enabled. Excerpt:
 
 ```
 [ 1] THIEF says: "You think you're tracking me well, but I'm staying one step ahead..." -> {'type': 'move', 'action': 'N'}
@@ -336,9 +406,12 @@ partner team and their two public MCP URLs.
 
 Every game parameter lives in `config.yaml`: `grid_size`, `max_moves`,
 `num_games`, `max_barriers`, the full `scoring` table, `vision_radius`,
-`allow_diagonal`, start rules, LLM backend (z.ai GLM), MCP host/port/token, Q-Learning
-hyper-parameters, and report metadata. `core/config.py` validates these into typed
-dataclasses; the rest of the code never hard-codes a game constant.
+`allow_diagonal`, start rules, LLM backend (z.ai GLM `glm-5`), MCP host/port/token,
+the Q-Learning hyper-parameters **including the behavioral-shaping knobs of §5.1**
+(`barrier_requires_visible`, `confinement_weight`, `barrier_bonus`, `idle_penalty`,
+`blind_stay_prob`, `revisit_penalty`, `loop_window`), and report metadata.
+`core/config.py` validates these into typed dataclasses; the rest of the code never
+hard-codes a game constant.
 
 **Team metadata** in `config.yaml` (`report.group_name`, `report.students`,
 `report.github_repo`, `report.cop_mcp_url`, `report.thief_mcp_url`) are
@@ -350,14 +423,13 @@ placeholders — fill them in before submission.
 
 | Check | Command | Result |
 |---|---|---|
-| Unit tests | `uv run pytest -q` | **147 passed** |
-| Coverage | `uv run pytest --cov` | **98%** total (gate ≥85%) |
+| Unit tests | `uv run pytest -q` | **169 passed** |
+| Coverage | `uv run pytest --cov` | **95%** total (gate ≥85%) |
 | Lint | `uv run ruff check .` | all checks passed |
-| File size | ≤150 code-lines/file | largest ≤150 (gate ≤150) |
+| File size | ≤150 code-lines/file | largest = 150 (gate ≤150) |
 | Staged sanity | `scripts/sanity_check.py` | full 6-sub-game series at 2×2→5×5, sensible scores |
 | Local series (in-process) | `orchestrator.py --inprocess` | completes 6 sub-games autonomously with NL logs |
 | Local series (networked) | live servers + `orchestrator.run(networked=True)` | completes via real MCP HTTP tool calls |
-| Q-Learning | `agents/train.py --episodes 2000` | trained cop 99% capture vs 14% random; curve + CSV emitted |
-| GUI | `gui/visualizer.py --headless` | renders + saves screenshots headlessly |
+| Q-Learning | `agents/train.py` (20 000 ep.) | trained cop ~0.90–0.99 capture vs ~0.14 random; strategic barriers, 0 placed while blind |
+| Replay + live view | `orchestrator.py` | writes `artifacts/game_full.gif`; serves the live board at `http://localhost:8000` |
 | Reporting | `reporting/email_report.py --dry-run` | prints schema-valid Internal Game JSON |
-```

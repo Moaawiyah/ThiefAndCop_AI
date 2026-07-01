@@ -1,0 +1,56 @@
+{
+  "group_name": "Team-Name",
+  "students": [],
+  "github_repo": "",
+  "cop_mcp_url": "https://suse-cabinet-freeze-president.trycloudflare.com/mcp",
+  "thief_mcp_url": "https://oriented-cdt-overview-richards.trycloudflare.com/mcp",
+  "timezone": "Asia/Jerusalem",
+  "sub_games": [
+    {
+      "sub_game": 1,
+      "winner": "cop",
+      "moves": 5,
+      "cop_score": 20,
+      "thief_score": 5
+    },
+    {
+      "sub_game": 2,
+      "winner": "cop",
+      "moves": 5,
+      "cop_score": 20,
+      "thief_score": 5
+    },
+    {
+      "sub_game": 3,
+      "winner": "cop",
+      "moves": 5,
+      "cop_score": 20,
+      "thief_score": 5
+    },
+    {
+      "sub_game": 4,
+      "winner": "thief",
+      "moves": 25,
+      "cop_score": 5,
+      "thief_score": 10
+    },
+    {
+      "sub_game": 5,
+      "winner": "cop",
+      "moves": 6,
+      "cop_score": 20,
+      "thief_score": 5
+    },
+    {
+      "sub_game": 6,
+      "winner": "thief",
+      "moves": 25,
+      "cop_score": 5,
+      "thief_score": 10
+    }
+  ],
+  "totals": {
+    "cop": 90,
+    "thief": 40
+  }
+}

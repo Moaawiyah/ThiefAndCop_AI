@@ -75,3 +75,24 @@ def test_cell_index_roundtrip():
         for c in range(4):
             idx = g.cell_index((r, c))
             assert g.index_to_cell(idx) == (r, c)
+
+
+def test_reachable_free_count_open_board():
+    g = Grid(3, 3)
+    # Fully open board: every one of the 9 cells is reachable.
+    assert g.reachable_free_count((1, 1)) == 9
+
+
+def test_reachable_free_count_shrinks_with_barriers():
+    g = Grid(3, 3)
+    before = g.reachable_free_count((0, 0))
+    # Wall off a cell not occupied by the thief -> reachable area drops.
+    g.add_barrier((2, 2))
+    after = g.reachable_free_count((0, 0))
+    assert after == before - 1
+
+
+def test_reachable_free_count_on_barrier_is_zero():
+    g = Grid(3, 3)
+    g.add_barrier((1, 1))
+    assert g.reachable_free_count((1, 1)) == 0
