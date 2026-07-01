@@ -13,7 +13,8 @@ scoring:
   thief_loss: 5          # thief's points when caught
 
 # --- Partial observability (§4.5 / §5.1) ---
-vision_radius: 2         # Chebyshev radius each agent can "see"
+vision_radius: 2         # Chebyshev radius each agent can "see" (partial: they
+                         # start out of sight at distance 3 and must close in)
 
 # --- Movement ---
 allow_diagonal: true     # 8-directional movement incl. diagonals
@@ -28,7 +29,7 @@ start:
 # The API key is read from `api_key` below, or (preferred) from the GLM_API_KEY
 # env var when api_key is empty. Keep secrets OUT of this committed file.
 llm:
-  model: glm-4.7-flashx
+  model: glm-5
   base_url: https://api.z.ai/api/paas/v4   # z.ai GLM cloud (OpenAI-compatible)
   api_key: ""             # prefer exporting GLM_API_KEY in .env over hard-coding here
   enabled: true           # real GLM NL; falls back to templates when unreachable
@@ -52,6 +53,14 @@ qlearning:
   epsilon_decay: 0.9995
   episodes: 20000
   q_dir: artifacts        # where q_cop.npy / q_thief.npy / curves are written
+  confinement_weight: 1.1   # cop reward per thief free-cell removed (barrier value)
+  barrier_bonus: 1.3        # flat reward added when a barrier actually confines the thief
+  thief_freedom_weight: 0.1  # thief reward per open cell it keeps reachable (anti-corner)
+  barrier_requires_visible: true  # cop may only place a barrier while the thief is in vision
+  idle_penalty: 0.15       # cost for not changing cell while the opponent is out of vision
+  blind_stay_prob: 0.15    # chance an agent lurks (stays) on a turn the opponent is unseen
+  revisit_penalty: 0.1     # soft training cost for stepping back into a recent cell (anti-loop)
+  loop_window: 3           # how many recent own-cells count as "recently visited"
 
 # --- Reporting (§9) ---
 report:

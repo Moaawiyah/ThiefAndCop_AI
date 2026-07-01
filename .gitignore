@@ -19,5 +19,9 @@ reporting/token.json
 hw6.md
 hw6.pdf
 
+# Loose macOS screen-capture files at the repo root (the curated README images
+# live under screenshots/ and ARE committed).
+Screenshot*.png
+
 # OS
 .DS_Store

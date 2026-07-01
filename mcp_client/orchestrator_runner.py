@@ -14,14 +14,17 @@ from core.engine import GameEngine
 from core.observation import Observation
 from agents.policy import build_policy
 from llm.glm_client import LLMClient
+from gui.series_gif import SeriesGif
 from mcp_client.bus import ToolBus
-from mcp_client.run_logging import setup_run_logger
+from mcp_client.run_logging import MarkdownLog, log_series_summary, setup_run_logger
 
 
 class Orchestrator:
     """Drives a full 6-sub-game series over a ToolBus."""
 
-    def __init__(self, config, bus: ToolBus, verbose: bool = True):
+    def __init__(self, config, bus: ToolBus, verbose: bool = True,
+                 record_gif: bool = False, serve_live: bool = False,
+                 host: str = "127.0.0.1", port: int = 8000):
         self.config = config
         self.bus = bus
         self.token = config.mcp.auth_token
@@ -29,6 +32,8 @@ class Orchestrator:
         self.logger, self.log_path = setup_run_logger(
             "orchestrator", config.q_dir_abs(), verbose
         )
+        self.md = MarkdownLog()
+        self.gif = SeriesGif(config, record_gif, serve=serve_live, host=host, port=port)
         self.llm = LLMClient(config.llm)
         # Policies (Q-table if trained, else heuristic) — owned by the client.
         self.cop_policy = build_policy("cop", config)
@@ -57,8 +62,7 @@ class Orchestrator:
         self.mirror.reset_sub_game()
         self.mirror.state.cop = tuple(status["cop_pos"])
         self.mirror.state.thief = tuple(status["thief_pos"])
-        self.mirror.state.move_number = 0
-        self.mirror.grid.clear_barriers()
+        self.mirror.state.move_number = 0  # reset_sub_game already cleared barriers
 
     # ----- turn logic ------------------------------------------------------
     def _exchange_messages(self, agent: str, obs: Observation) -> str:
@@ -88,15 +92,19 @@ class Orchestrator:
 
     def _turn(self, agent: str, move: int) -> bool:
         """Run one agent's full turn; return True if it ended in a capture."""
+        self.mirror.state.move_number = move  # keep the mirror's counter live for the view
         obs = self._obs(agent)
         msg = self._exchange_messages(agent, obs)
         action = self._decide_action(agent, obs)
         res = self._apply_action(agent, action)
         label = f"  [{move:>2}] THIEF says:" if agent == "thief" else "       COP   says:"
         self.log(f"{label} \"{msg}\" -> {action}")
+        self.md.turn(move, agent, msg, action)
+        self.gif.turn(agent, msg, self.mirror, self.llm.available)
         if res["captured"]:
             who = "thief moved onto cop" if agent == "thief" else "cop landed on thief"
             self.log(f"       >> capture! {who} at {self.mirror.state.cop}")
+            self.md.capture(who, self.mirror.state.cop)
             return True
         return False
 
@@ -111,8 +119,10 @@ class Orchestrator:
         cfg = self.config
         winner = "thief"
         move = 0
+        self.gif.start_sub_game(index)
         self.log(f"\n--- Sub-game {index} (start cop={self.mirror.state.cop} "
                  f"thief={self.mirror.state.thief}) ---")
+        self.md.sub_game_header(index, self.mirror.state.cop, self.mirror.state.thief)
 
         while move < cfg.max_moves:
             move += 1
@@ -130,7 +140,9 @@ class Orchestrator:
         else:
             cop_score, thief_score = cfg.scoring.cop_loss, cfg.scoring.thief_win
             self.log(f"  >> thief survived {move} moves -> thief wins")
+            self.md.thief_survived(move)
 
+        self.gif.add_score(cop_score, thief_score)
         return {
             "sub_game": index,
             "winner": winner,
@@ -158,13 +170,11 @@ class Orchestrator:
             "cop": sum(r["cop_score"] for r in results),
             "thief": sum(r["thief_score"] for r in results),
         }
-        self.log("\n===== SERIES COMPLETE =====")
-        for r in results:
-            self.log(f"  sub-game {r['sub_game']}: winner={r['winner']:<5} "
-                     f"moves={r['moves']:<2} cop={r['cop_score']} thief={r['thief_score']}")
-        self.log(f"  TOTALS -> cop={totals['cop']} thief={totals['thief']}")
-        self.log(f"  LLM (GLM) active: {self.llm.available} | tokens used: {self.llm.usage}")
-        self.log(f"  full run log written to: {self.log_path}")
+        gif_path = self.gif.save()
+        self.md.series_complete(results, totals, self.llm.available, dict(self.llm.usage))
+        md_path = self.md.write(self.config.q_dir_abs())
+        log_series_summary(self.logger, results, totals, self.llm,
+                           self.log_path, md_path, gif_path)
         return {
             "results": results, "totals": totals,
             "llm_active": self.llm.available, "llm_usage": dict(self.llm.usage),

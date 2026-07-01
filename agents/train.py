@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+from collections import deque
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -37,7 +38,8 @@ import numpy as np
 from core.config import load_config
 from core.engine import GameEngine
 from agents.qlearning import QTable
-from agents.train_utils import apply_action, evaluate, legal_mask, write_curve
+from agents.train_utils import evaluate, write_curve
+from agents.turn import step_agent
 
 
 def train(config, episodes: int, seed: int = 0):
@@ -56,72 +58,34 @@ def train(config, episodes: int, seed: int = 0):
     history = []  # (episode, cop_reward, thief_reward, captured, epsilon)
     cap_win = config.scoring.cop_win
     surv_win = config.scoring.thief_win
+    win = config.qlearning.loop_window
 
     for ep in range(episodes):
         engine.reset_sub_game()
         s = engine.state
         cop_total = thief_total = 0.0
         captured = False
-        # Belief = last-known opponent cell for each agent.
+        # Belief = last-known opponent cell; history = recent own cells (anti-loop).
         cop_belief = thief_belief = None
+        cop_hist: deque = deque(maxlen=win)
+        thief_hist: deque = deque(maxlen=win)
 
         while s.move_number < config.max_moves:
             s.move_number += 1
-            cell = engine.grid.cell_index
 
-            # ---- Thief turn (moves first) ----
-            t_self = cell(s.thief)
-            t_visible = engine.grid.chebyshev(s.thief, s.cop) <= config.vision_radius
-            if t_visible:
-                thief_belief = cell(s.cop)
-            t_state = thief_q.encode_state(t_self, thief_belief)
-            t_mask = legal_mask(thief_q, engine, s.thief, 0)
-            t_aidx = thief_q.select_action_index(t_state, t_mask)
-            dist_before = engine.grid.chebyshev(s.thief, s.cop)
-            apply_action(engine, "thief", thief_q.actions[t_aidx])
-
-            if engine.is_capture():
-                # thief stepped onto cop
-                r_thief = -cap_win
-                r_cop = cap_win
-                t_next = thief_q.encode_state(cell(s.thief), thief_belief)
-                thief_q.update(t_state, t_aidx, r_thief, t_next, True)
-                cop_total += r_cop
-                thief_total += r_thief
-                captured = True
+            # Thief moves first; if it walks onto the cop, the cop is credited.
+            thief_belief, captured, r = step_agent(
+                engine, "thief", thief_q, thief_belief, thief_hist, config)
+            thief_total += r
+            if captured:
+                cop_total += cap_win
                 break
-            dist_after = engine.grid.chebyshev(s.thief, s.cop)
-            # Shaping: thief rewarded for increasing distance + survival.
-            r_thief = 0.1 * (dist_after - dist_before) + 0.05
-            t_next = thief_q.encode_state(cell(s.thief), thief_belief)
-            thief_q.update(t_state, t_aidx, r_thief, t_next, False)
-            thief_total += r_thief
 
-            # ---- Cop turn ----
-            c_self = cell(s.cop)
-            c_visible = engine.grid.chebyshev(s.cop, s.thief) <= config.vision_radius
-            if c_visible:
-                cop_belief = cell(s.thief)
-            c_state = cop_q.encode_state(c_self, cop_belief)
-            barriers_left = config.max_barriers - s.barriers_placed
-            c_mask = legal_mask(cop_q, engine, s.cop, barriers_left)
-            c_aidx = cop_q.select_action_index(c_state, c_mask)
-            dist_before = engine.grid.chebyshev(s.cop, s.thief)
-            apply_action(engine, "cop", cop_q.actions[c_aidx])
-
-            if engine.is_capture():
-                r_cop = cap_win
-                c_next = cop_q.encode_state(cell(s.cop), cop_belief)
-                cop_q.update(c_state, c_aidx, r_cop, c_next, True)
-                cop_total += r_cop
-                captured = True
+            cop_belief, captured, r = step_agent(
+                engine, "cop", cop_q, cop_belief, cop_hist, config)
+            cop_total += r
+            if captured:
                 break
-            dist_after = engine.grid.chebyshev(s.cop, s.thief)
-            # Shaping: cop rewarded for decreasing distance, small time penalty.
-            r_cop = 0.1 * (dist_before - dist_after) - 0.05
-            c_next = cop_q.encode_state(cell(s.cop), cop_belief)
-            cop_q.update(c_state, c_aidx, r_cop, c_next, False)
-            cop_total += r_cop
 
         if not captured:
             # Timeout terminal rewards.

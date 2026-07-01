@@ -98,6 +98,27 @@ class Grid:
     def clear_barriers(self) -> None:
         self.barriers.clear()
 
+    def reachable_free_count(self, pos: Position) -> int:
+        """Number of passable cells reachable from ``pos`` (incl. ``pos`` itself)
+        via legal single steps. This is the thief's "escape freedom": barriers
+        that wall it in shrink this count, which the trainer rewards the cop for.
+        """
+        if not self.is_passable(pos):
+            return 0
+        seen = {pos}
+        stack = [pos]
+        while stack:
+            cur = stack.pop()
+            for a in self.legal_moves(cur):
+                if a == "stay":
+                    continue
+                dr, dc = DIRECTIONS[a]
+                nxt = (cur[0] + dr, cur[1] + dc)
+                if nxt not in seen:
+                    seen.add(nxt)
+                    stack.append(nxt)
+        return len(seen)
+
     def chebyshev(self, a: Position, b: Position) -> int:
         """Chebyshev (king-move) distance — natural metric for 8-dir movement."""
         return max(abs(a[0] - b[0]), abs(a[1] - b[1]))

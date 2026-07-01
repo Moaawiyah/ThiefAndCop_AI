@@ -45,6 +45,11 @@ def test_orchestrator_play_series_completes_and_matches_schema(tmp_path):
     assert summary["llm_active"] is False
     assert summary["llm_usage"] == {"prompt_tokens": 0, "completion_tokens": 0,
                                      "total_tokens": 0}
+    md_path = os.path.join(cfg.q_dir_abs(), "full_game_log.md")
+    assert os.path.exists(md_path)
+    with open(md_path, encoding="utf-8") as fh:
+        content = fh.read()
+    assert "Series Complete" in content
 
 
 def test_orchestrator_writes_log_file(tmp_path):
@@ -86,5 +91,6 @@ def test_run_main_inprocess_cli(tmp_path, monkeypatch, capsys):
         orchestrator_module, "load_config",
         lambda: make_test_config(tmp_path, num_games=1, max_moves=4),
     )
-    monkeypatch.setattr("sys.argv", ["orchestrator.py", "--inprocess", "--quiet"])
+    monkeypatch.setattr("sys.argv",
+                        ["orchestrator.py", "--inprocess", "--quiet", "--no-watch"])
     orchestrator_module.main()

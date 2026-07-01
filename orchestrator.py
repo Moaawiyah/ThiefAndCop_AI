@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import threading
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -49,7 +50,8 @@ def _load_dotenv(path: str = ".env") -> None:
             os.environ.setdefault(key.strip(), value.strip())
 
 
-def run(networked: bool = False, verbose: bool = True) -> dict:
+def run(networked: bool = False, verbose: bool = True, record_gif: bool = False,
+        serve_live: bool = False, port: int = 8000) -> dict:
     """Top-level entry: build a bus + orchestrator and play the series."""
     _load_dotenv()
     config = load_config()
@@ -58,7 +60,8 @@ def run(networked: bool = False, verbose: bool = True) -> dict:
         bus = NetworkedBus(config)
     else:
         bus = InProcessBus(config)
-    orch = Orchestrator(config, bus, verbose=verbose)
+    orch = Orchestrator(config, bus, verbose=verbose, record_gif=record_gif,
+                        serve_live=serve_live, port=port)
     try:
         summary = orch.play_series()
     finally:
@@ -75,9 +78,23 @@ def main():
     mode.add_argument("--networked", action="store_true",
                       help="connect to the two live FastMCP servers over HTTP (default)")
     p.add_argument("--quiet", action="store_true")
+    p.add_argument("--no-gif", action="store_true",
+                   help="skip writing artifacts/game_full.gif for this run")
+    p.add_argument("--no-watch", action="store_true",
+                   help="disable the live web view (served at http://localhost:PORT by default)")
+    p.add_argument("--port", type=int, default=8000)
     args = p.parse_args()
-    # Real MCP (networked) is the default; --inprocess opts out.
-    run(networked=not args.inprocess, verbose=not args.quiet)
+    # Real MCP (networked) is the default; --inprocess opts out. The animated GIF
+    # and the live browser view are both on by default (opt out with --no-gif / --no-watch).
+    watch = not args.no_watch
+    run(networked=not args.inprocess, verbose=not args.quiet,
+        record_gif=not args.no_gif, serve_live=watch, port=args.port)
+    if watch:
+        print("[live] series finished — server still up. Press Ctrl-C to stop.")
+        try:
+            threading.Event().wait()
+        except KeyboardInterrupt:
+            pass
 
 
 if __name__ == "__main__":

@@ -41,7 +41,7 @@ class LLMConfig:
     prefer the env var.
     """
 
-    model: str = "glm-4.7-flashx"
+    model: str = "glm-5"
     base_url: str = "https://api.z.ai/api/paas/v4"
     api_key: str = ""
     enabled: bool = False
@@ -69,6 +69,22 @@ class QLearningConfig:
     epsilon_decay: float = 0.9995
     episodes: int = 20000
     q_dir: str = "artifacts"
+    # Cop reward weight for shrinking the thief's reachable free area (barriers).
+    confinement_weight: float = 0.15
+    # Flat reward added when a barrier actually confines the thief (strategic nudge).
+    barrier_bonus: float = 1.0
+    # Thief reward weight for keeping its own reachable free area (anti-cornering).
+    thief_freedom_weight: float = 0.1
+    # Cop may only place a barrier while the thief is currently in vision.
+    barrier_requires_visible: bool = True
+    # Cost for not changing cell while the opponent is out of vision.
+    idle_penalty: float = 0.15
+    # Chance an agent is allowed to lurk (stay) on a turn its opponent is unseen.
+    blind_stay_prob: float = 0.15
+    # Soft training cost for stepping back into a recently-visited cell (anti-loop).
+    revisit_penalty: float = 0.15
+    # How many recent own-cells count as "recently visited" for the penalty.
+    loop_window: int = 3
 
 
 @dataclass
