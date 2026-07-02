@@ -120,6 +120,37 @@ def test_thief_step_reward_rewards_keeping_open_space():
     assert revis < move
 
 
+def test_thief_blind_flee_prefers_opening_distance_from_belief():
+    # Blind, with a belief: moving away from the last-known cop (positive delta)
+    # beats moving toward it (negative delta); both beat idling.
+    away = thief_step_reward(False, 2, 2, 10, 10, True, False, 0.1, 0.15, 0.1,
+                             blind_flee_coef=0.2, blind_flee_delta=1)
+    toward = thief_step_reward(False, 2, 2, 10, 10, True, False, 0.1, 0.15, 0.1,
+                               blind_flee_coef=0.2, blind_flee_delta=-1)
+    idle = thief_step_reward(False, 2, 2, 10, 10, False, False, 0.1, 0.15, 0.1,
+                             blind_flee_coef=0.2, blind_flee_delta=0)
+    assert away > toward
+    assert away > idle
+
+
+def test_thief_mobility_rewards_open_cells():
+    # More open escape routes at the new cell -> higher reward, all else equal.
+    corner = thief_step_reward(False, 2, 2, 10, 10, True, False, 0.1, 0.15, 0.1,
+                               mobility=3, mobility_coef=0.05)
+    center = thief_step_reward(False, 2, 2, 10, 10, True, False, 0.1, 0.15, 0.1,
+                               mobility=8, mobility_coef=0.05)
+    assert center > corner
+
+
+def test_thief_corner_penalty_discourages_corners():
+    # Stepping into a corner costs the flat corner penalty vs. an open cell.
+    in_corner = thief_step_reward(False, 2, 2, 10, 10, True, False, 0.1, 0.15, 0.1,
+                                  corner=True, corner_penalty=0.3)
+    open_cell = thief_step_reward(False, 2, 2, 10, 10, True, False, 0.1, 0.15, 0.1,
+                                  corner=False, corner_penalty=0.3)
+    assert open_cell - in_corner == 0.3
+
+
 def test_cop_step_reward_penalises_idle_and_revisits():
     # A blind cop that stays is worse than one that moves.
     idle = cop_step_reward(False, 1, 1, 10, 10, "stay", False, False, 0.15, 0.15, 1.0, 0.1)

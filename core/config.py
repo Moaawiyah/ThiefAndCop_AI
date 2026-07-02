@@ -123,6 +123,9 @@ def load_config(path: Optional[str] = None) -> Config:
             epsilon_start=float(ql_raw.get("epsilon_start", 1.0)),
             epsilon_min=float(ql_raw.get("epsilon_min", 0.05)),
             epsilon_decay=float(ql_raw.get("epsilon_decay", 0.9995)),
+            thief_epsilon_decay=float(
+                ql_raw.get("thief_epsilon_decay", ql_raw.get("epsilon_decay", 0.9995))
+            ),
             episodes=int(ql_raw.get("episodes", 20000)),
             q_dir=str(ql_raw.get("q_dir", "artifacts")),
             confinement_weight=float(ql_raw.get("confinement_weight", 0.15)),
@@ -133,6 +136,14 @@ def load_config(path: Optional[str] = None) -> Config:
             blind_stay_prob=float(ql_raw.get("blind_stay_prob", 0.15)),
             revisit_penalty=float(ql_raw.get("revisit_penalty", 0.15)),
             loop_window=int(ql_raw.get("loop_window", 3)),
+            thief_survive_reward=float(ql_raw.get("thief_survive_reward", 10.0)),
+            thief_dist_coef=float(ql_raw.get("thief_dist_coef", 0.1)),
+            cop_dist_coef=float(ql_raw.get("cop_dist_coef", 0.1)),
+            survive_bonus=float(ql_raw.get("survive_bonus", 0.05)),
+            search_move_bonus=float(ql_raw.get("search_move_bonus", 0.05)),
+            thief_blind_flee_coef=float(ql_raw.get("thief_blind_flee_coef", 0.0)),
+            thief_mobility_coef=float(ql_raw.get("thief_mobility_coef", 0.0)),
+            thief_corner_penalty=float(ql_raw.get("thief_corner_penalty", 0.0)),
         ),
         report=ReportConfig(
             email_target=str(report_raw.get("email_target", "rmisegal+uoh26b@gmail.com")),

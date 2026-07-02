@@ -23,7 +23,7 @@ allow_diagonal: true     # 8-directional movement incl. diagonals
 start:
   cop: random
   thief: random
-  min_initial_distance: 3  # keep agents apart at start (> vision_radius for stage 3/4 sanity)
+  min_initial_distance: 4  # keep agents apart at start (> vision_radius for stage 3/4 sanity)
 
 # --- LLM backend (Approach 1: public GLM cloud API, OpenAI-compatible) ---
 # The API key is read from `api_key` below, or (preferred) from the GLM_API_KEY
@@ -47,20 +47,42 @@ mcp:
 # --- Q-Learning hyper-parameters (§8.2) ---
 qlearning:
   learning_rate: 0.1
-  discount_factor: 0.9
+  discount_factor: 0.97      # balances long-term planning with stable learning
+
   epsilon_start: 1.0
   epsilon_min: 0.05
-  epsilon_decay: 0.9995
-  episodes: 20000
-  q_dir: artifacts        # where q_cop.npy / q_thief.npy / curves are written
-  confinement_weight: 1.1   # cop reward per thief free-cell removed (barrier value)
-  barrier_bonus: 1.3        # flat reward added when a barrier actually confines the thief
-  thief_freedom_weight: 0.1  # thief reward per open cell it keeps reachable (anti-corner)
-  barrier_requires_visible: true  # cop may only place a barrier while the thief is in vision
-  idle_penalty: 0.15       # cost for not changing cell while the opponent is out of vision
-  blind_stay_prob: 0.15    # chance an agent lurks (stays) on a turn the opponent is unseen
-  revisit_penalty: 0.1     # soft training cost for stepping back into a recent cell (anti-loop)
-  loop_window: 3           # how many recent own-cells count as "recently visited"
+  epsilon_decay: 0.9995          # cop explores, then gradually exploits
+  thief_epsilon_decay: 0.9999    # thief explores longer to learn escape strategies
+
+  episodes: 60000
+  q_dir: artifacts               # where q_cop.npy / q_thief.npy / curves are written
+
+  # --- Barrier behaviour ---
+  # Barriers are a *situational* tool: they sit on the cop's own cell and cost it
+  # a turn, so their reward is kept well below a capture (+cop_win). A visible-gated,
+  # modest barrier lets the cop confine an already-cornered thief WITHOUT ever
+  # out-valuing the direct "step onto the thief" capture move.
+  confinement_weight: 0.30       # reward for reducing thief's reachable area (raised: more barriers)
+  barrier_bonus: 0.60            # flat reward when a barrier actually confines (raised: more barriers)
+  thief_freedom_weight: 0.80     # reward for keeping escape space open
+  barrier_requires_visible: true # only barrier while the thief is visible (no blind
+                                 # self-walling / wasted turns that stall the chase)
+
+  # --- Movement behaviour ---
+  idle_penalty: 0.15             # discourage standing still
+  blind_stay_prob: 0.05          # only occasionally stay while searching
+  revisit_penalty: 0.08          # discourage oscillating between cells
+  loop_window: 3                 # remember more recent positions to detect loops
+
+  # --- Training reward balancing ---
+  thief_survive_reward: 35.0     # stronger terminal reward for successful survival/escape
+  thief_dist_coef: 0.70          # encourage increasing distance from the cop
+  cop_dist_coef: 0.10            # chase priority: close Chebyshev distance to the thief
+  survive_bonus: 0.15            # reward surviving each additional turn
+  search_move_bonus: 0.08        # reward active searching instead of waiting
+  thief_blind_flee_coef: 0.15    # blind: flee directionally from cop's last-known cell
+  thief_mobility_coef: 0.03      # reward open escape routes at new cell (anti-corner)
+  thief_corner_penalty: 0.30     # flat penalty for stepping into a corner / trapped pocket
 
 # --- Reporting (§9) ---
 report:

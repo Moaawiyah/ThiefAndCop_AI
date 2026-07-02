@@ -52,6 +52,16 @@ def test_main_full_pipeline_writes_artifacts(tmp_path, monkeypatch):
     assert os.path.exists(os.path.join(q_dir, "learning_curve.png"))
 
 
+def test_train_uses_distinct_epsilon_schedules_for_cop_and_thief(tmp_path):
+    cfg = small_config(tmp_path)
+    cfg.qlearning.epsilon_decay = 0.9
+    cfg.qlearning.thief_epsilon_decay = 0.99
+    cop_q, thief_q, _ = train_mod.train(cfg, episodes=5, seed=3)
+    assert cop_q.epsilon_decay == 0.9
+    assert thief_q.epsilon_decay == 0.99
+    assert cop_q.epsilon < thief_q.epsilon
+
+
 def test_main_eval_only_path_does_not_overwrite_missing_tables(tmp_path, monkeypatch):
     cfg = small_config(tmp_path, rows=3, cols=3)
     monkeypatch.setattr(train_mod, "load_config", lambda: cfg)
