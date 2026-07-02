@@ -46,10 +46,14 @@ def phase_train(config, episodes: int, seed: int) -> None:
     print(f"      saved Q-tables + learning curves to {q_dir}")
 
 
-def phase_orchestrate(networked: bool, record_gif: bool) -> dict:
-    """Play a full series with the trained policies (writes log + optional GIF)."""
+def phase_orchestrate(networked: bool, record_gif: bool, verbose: bool = True) -> dict:
+    """Play a full series with the trained policies (writes log + optional GIF).
+
+    ``verbose`` prints each turn's natural-language dialogue to the terminal (the
+    live game), matching ``orchestrator.py``'s default; pass ``--quiet`` to mute.
+    """
     print(f"[2/3] Playing MCP series ({'networked' if networked else 'in-process'})...")
-    summary = run_orchestrator(networked=networked, verbose=False,
+    summary = run_orchestrator(networked=networked, verbose=verbose,
                                record_gif=record_gif, serve_live=False)
     print(f"      series complete — totals: {summary.get('totals', {})}")
     return summary
@@ -83,6 +87,7 @@ def main() -> None:
     p.add_argument("--networked", action="store_true",
                    help="orchestrate over the live FastMCP servers (default: in-process)")
     p.add_argument("--no-gif", action="store_true", help="skip writing artifacts/game_full.gif")
+    p.add_argument("--quiet", action="store_true", help="mute the per-turn game dialogue printout")
     p.add_argument("--skip-train", action="store_true", help="reuse existing Q-tables")
     p.add_argument("--skip-orchestrate", action="store_true",
                    help="skip the live series (the report then uses sample data)")
@@ -95,7 +100,7 @@ def main() -> None:
         phase_train(config, episodes, args.seed)
     summary = None
     if not args.skip_orchestrate:
-        summary = phase_orchestrate(args.networked, not args.no_gif)
+        summary = phase_orchestrate(args.networked, not args.no_gif, verbose=not args.quiet)
     if not args.skip_email:
         results = summary["results"] if summary else None
         phase_email(config, results, args.send)
