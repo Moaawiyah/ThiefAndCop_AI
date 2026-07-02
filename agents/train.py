@@ -11,7 +11,9 @@ configured grid, writing:
 Reward shaping (sparse terminal + small distance shaping so learning is feasible
 on the small grids of this assignment):
     * Capture: cop +scoring.cop_win, thief -scoring.cop_win  (terminal)
-    * Timeout: cop -scoring.thief_win, thief +scoring.thief_win (terminal)
+    * Timeout: cop -thief_survive_reward, thief +thief_survive_reward (terminal;
+      decoupled from the report's Table-1 thief_win so the survival learning signal
+      can match the cop's capture signal)
     * Per step: cop gets a small positive reward for decreasing Chebyshev
       distance to the thief; thief gets the mirror. Plus a tiny time penalty for
       the cop (encourages fast capture) and a tiny survival bonus for the thief.
@@ -39,7 +41,7 @@ from core.config import load_config
 from core.engine import GameEngine
 from agents.qlearning import QTable
 from agents.train_utils import evaluate, write_curve
-from agents.turn import step_agent
+from agents.turn import act_agent
 
 
 def train(config, episodes: int, seed: int = 0):
@@ -53,11 +55,13 @@ def train(config, episodes: int, seed: int = 0):
                    ql.epsilon_min, ql.epsilon_decay, rng=rng)
     thief_q = QTable("thief", config.num_cells, config.allow_diagonal,
                      ql.learning_rate, ql.discount_factor, ql.epsilon_start,
-                     ql.epsilon_min, ql.epsilon_decay, rng=rng)
+                     ql.epsilon_min, ql.thief_epsilon_decay, rng=rng)
 
     history = []  # (episode, cop_reward, thief_reward, captured, epsilon)
     cap_win = config.scoring.cop_win
-    surv_win = config.scoring.thief_win
+    # Training-only survival terminal, decoupled from the report's Table-1 score:
+    # lets the thief's learning signal match the cop's capture signal.
+    surv_win = config.qlearning.thief_survive_reward
     win = config.qlearning.loop_window
 
     for ep in range(episodes):
@@ -72,25 +76,41 @@ def train(config, episodes: int, seed: int = 0):
 
         while s.move_number < config.max_moves:
             s.move_number += 1
+            last_step = s.move_number >= config.max_moves
 
-            # Thief moves first; if it walks onto the cop, the cop is credited.
-            thief_belief, captured, r = step_agent(
-                engine, "thief", thief_q, thief_belief, thief_hist, config)
-            thief_total += r
-            if captured:
+            # Thief moves first; its learning is DEFERRED until the cop responds
+            # so the thief is penalised terminally when the cop pounces (not only
+            # when the thief itself walks onto the cop).
+            tt = act_agent(engine, "thief", thief_q, thief_belief, thief_hist, config)
+            thief_belief = tt.belief
+            if tt.captured:  # thief walked onto the cop -> terminal for the thief
+                thief_q.update(tt.state, tt.aidx, tt.reward, tt.next_state, True)
+                thief_total += tt.reward
                 cop_total += cap_win
+                captured = True
                 break
 
-            cop_belief, captured, r = step_agent(
-                engine, "cop", cop_q, cop_belief, cop_hist, config)
-            cop_total += r
-            if captured:
+            ct = act_agent(engine, "cop", cop_q, cop_belief, cop_hist, config)
+            cop_belief = ct.belief
+            if ct.captured:  # cop pounced -> the thief's move was fatal
+                cop_q.update(ct.state, ct.aidx, ct.reward, ct.next_state, True)
+                thief_q.update(tt.state, tt.aidx, -cap_win, tt.next_state, True)
+                cop_total += ct.reward
+                thief_total += -cap_win
+                captured = True
                 break
 
-        if not captured:
-            # Timeout terminal rewards.
-            cop_total += -surv_win
-            thief_total += surv_win
+            if last_step:
+                # Timeout terminal: thief survives (+surv_win), cop times out (-surv_win).
+                thief_q.update(tt.state, tt.aidx, surv_win, tt.next_state, True)
+                cop_q.update(ct.state, ct.aidx, -surv_win, ct.next_state, True)
+                thief_total += surv_win
+                cop_total += -surv_win
+            else:
+                thief_q.update(tt.state, tt.aidx, tt.reward, tt.next_state, False)
+                cop_q.update(ct.state, ct.aidx, ct.reward, ct.next_state, False)
+                thief_total += tt.reward
+                cop_total += ct.reward
 
         cop_q.decay_epsilon()
         thief_q.decay_epsilon()
@@ -127,9 +147,11 @@ def main():
 
     print("Evaluating trained cop vs random baseline "
           f"({args.eval_n} sub-games each, heuristic thief)...")
-    metrics = evaluate(config, cop_path, n=args.eval_n, seed=args.seed + 7)
-    print(f"  trained cop capture rate: {metrics['trained_capture_rate']}")
-    print(f"  random  cop capture rate: {metrics['random_capture_rate']}")
+    metrics = evaluate(config, cop_path, thief_path, n=args.eval_n, seed=args.seed + 7)
+    print(f"  trained cop capture rate:      {metrics['trained_capture_rate']}")
+    print(f"  random  cop capture rate:      {metrics['random_capture_rate']}")
+    print(f"  trained thief survival rate:   {metrics['thief_survival_rate']}")
+    print(f"  self-play (cop vs thief) rate: {metrics['self_play_capture_rate']}")
     if metrics["trained_capture_rate"] is not None:
         if metrics["trained_capture_rate"] >= metrics["random_capture_rate"]:
             print("  RESULT: trained cop >= random baseline. OK")

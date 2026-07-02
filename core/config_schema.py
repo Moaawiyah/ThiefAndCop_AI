@@ -67,6 +67,9 @@ class QLearningConfig:
     epsilon_start: float = 1.0
     epsilon_min: float = 0.05
     epsilon_decay: float = 0.9995
+    # Thief-only epsilon decay override; defaults to epsilon_decay so the two
+    # roles share one schedule unless explicitly split in config.yaml.
+    thief_epsilon_decay: float = 0.9995
     episodes: int = 20000
     q_dir: str = "artifacts"
     # Cop reward weight for shrinking the thief's reachable free area (barriers).
@@ -85,6 +88,29 @@ class QLearningConfig:
     revisit_penalty: float = 0.15
     # How many recent own-cells count as "recently visited" for the penalty.
     loop_window: int = 3
+    # Training-only survival terminal for the thief, decoupled from the report
+    # scoring.thief_win (Table 1 stays fixed). Set ~ cop_win to balance learning
+    # signal between the two roles.
+    thief_survive_reward: float = 10.0
+    # Per-step distance-shaping coefficients (role-specific so flee/chase can be
+    # tuned independently); reward = coef * (distance change in the agent's favour).
+    thief_dist_coef: float = 0.1
+    cop_dist_coef: float = 0.1
+    # Per-step survival bonus paid to the thief for each move it stays alive.
+    survive_bonus: float = 0.05
+    # Reward for any real position change while the opponent is out of vision (search).
+    search_move_bonus: float = 0.05
+    # Thief blind-evasion: while the cop is out of vision, reward per Chebyshev
+    # step of extra distance the thief opens up from the cop's last-known cell
+    # (directional flee) instead of a flat move bonus. 0.0 keeps the old behaviour.
+    thief_blind_flee_coef: float = 0.0
+    # Thief anti-corner: reward per open escape route (legal move) available at
+    # the thief's new cell, so it favours open space over corners. 0.0 disables.
+    thief_mobility_coef: float = 0.0
+    # Thief corner penalty: flat cost for stepping into a corner / low-mobility
+    # pocket (<=4 legal moves incl. stay), a sharper "don't get trapped" signal
+    # than the linear mobility reward. 0.0 disables.
+    thief_corner_penalty: float = 0.0
 
 
 @dataclass

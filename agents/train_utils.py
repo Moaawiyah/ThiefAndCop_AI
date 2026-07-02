@@ -12,8 +12,9 @@ import os
 
 import numpy as np
 
-from core.engine import GameEngine, heuristic_thief_policy, random_policy
+from core.engine import GameEngine
 from agents.qlearning import QTable
+from agents.evaluate import evaluate  # noqa: F401  (re-exported for callers/tests)
 
 # Headless-safe matplotlib backend.
 import matplotlib
@@ -54,33 +55,51 @@ def legal_mask(qtable: QTable, engine: GameEngine, self_pos, barriers_left: int,
     return mask
 
 
-def idle_or_move(moved: bool, idle_penalty: float) -> float:
+def idle_or_move(moved: bool, idle_penalty: float,
+                 search_bonus: float = SEARCH_MOVE_BONUS) -> float:
     """Blind-phase shaping keyed on *actual* movement, not the action label.
 
     Rewards any real position change (search) and penalises standing still, so a
     wall-bump that leaves the agent in place is penalised just like ``stay``.
     """
-    return SEARCH_MOVE_BONUS if moved else -idle_penalty
+    return search_bonus if moved else -idle_penalty
 
 
 def thief_step_reward(visible, dist_before, dist_after, free_before, free_after,
-                      moved, revisited, free_w, idle_penalty, revisit_penalty) -> float:
-    """Per-step thief reward: flee when the cop is visible, search when blind.
+                      moved, revisited, free_w, idle_penalty, revisit_penalty,
+                      dist_coef=DIST_COEF, survive_bonus=SURVIVE_BONUS,
+                      search_bonus=SEARCH_MOVE_BONUS, blind_flee_coef=0.0,
+                      blind_flee_delta=None, mobility=0, mobility_coef=0.0,
+                      corner=False, corner_penalty=0.0) -> float:
+    """Per-step thief reward: flee when the cop is visible, flee-from-belief when blind.
 
-    Rewards keeping open escape space plus a survival bonus, penalises idling
-    while blind, and applies a soft cost for stepping back into a recently-visited
-    cell so the thief flees instead of ping-ponging (loops are discouraged, not
-    forbidden).
+    Rewards keeping open escape space plus a survival bonus, and applies a soft
+    cost for stepping back into a recently-visited cell (loops discouraged, not
+    forbidden). While the cop is out of vision, ``blind_flee_delta`` (extra
+    Chebyshev distance opened up from the cop's *last-known* cell) drives a
+    directional flee; with no belief yet it falls back to the flat search/idle
+    bonus. ``mobility`` (open escape routes at the new cell) is rewarded, and a
+    flat ``corner_penalty`` fires when ``corner`` — so the thief favours open
+    space and actively avoids corners / trapped pockets the cop can wall it into.
     """
-    motion = (DIST_COEF * (dist_after - dist_before) if visible
-              else idle_or_move(moved, idle_penalty))
+    if visible:
+        motion = dist_coef * (dist_after - dist_before)
+    elif blind_flee_delta is None:
+        motion = idle_or_move(moved, idle_penalty, search_bonus)
+    elif not moved:
+        motion = -idle_penalty
+    else:
+        motion = blind_flee_coef * blind_flee_delta
     revisit = revisit_penalty if revisited else 0.0
-    return motion + free_w * (free_after - free_before) + SURVIVE_BONUS - revisit
+    corner_cost = corner_penalty if corner else 0.0
+    return (motion + free_w * (free_after - free_before) + survive_bonus
+            + mobility_coef * mobility - revisit - corner_cost)
 
 
 def cop_step_reward(visible, dist_before, dist_after, free_before, free_after,
                     action, moved, revisited, conf_w, idle_penalty, barrier_bonus,
-                    revisit_penalty) -> float:
+                    revisit_penalty, dist_coef=DIST_COEF,
+                    search_bonus=SEARCH_MOVE_BONUS) -> float:
     """Per-step cop reward: closes distance + confines when the thief is visible.
 
     A ``barrier`` that shrinks the thief's reachable area earns the confinement
@@ -96,8 +115,8 @@ def cop_step_reward(visible, dist_before, dist_after, free_before, free_after,
         return -idle_penalty
     revisit = revisit_penalty if revisited else 0.0
     if not visible:
-        return idle_or_move(moved, idle_penalty) - revisit
-    return DIST_COEF * (dist_before - dist_after) + conf_w * (free_before - free_after) - revisit
+        return idle_or_move(moved, idle_penalty, search_bonus) - revisit
+    return dist_coef * (dist_before - dist_after) + conf_w * (free_before - free_after) - revisit
 
 
 def apply_action(engine: GameEngine, role: str, action_label: str) -> None:
@@ -152,27 +171,3 @@ def write_curve(history, q_dir: str):
     fig.savefig(png_path, dpi=120)
     plt.close(fig)
     return csv_path, png_path
-
-
-def evaluate(config, cop_q_path: str, n: int = 200, seed: int = 123) -> dict:
-    """Compare a trained cop vs a random cop, both chasing a heuristic thief.
-
-    Returns capture rates so we can confirm the trained cop beats the baseline.
-    """
-    import random as _random
-
-    from agents.policy import QPolicy  # local: avoids a policy<->turn import cycle
-
-    def run(cop_policy, label):
-        eng = GameEngine(config, rng=_random.Random(seed))
-        captures = 0
-        for _ in range(n):
-            res = eng.play_sub_game(cop_policy, heuristic_thief_policy)
-            if res.winner == "cop":
-                captures += 1
-        return captures / n
-
-    trained = QPolicy("cop", config, q_path=cop_q_path)
-    trained_rate = run(trained, "trained") if trained.loaded else None
-    random_rate = run(random_policy, "random")
-    return {"trained_capture_rate": trained_rate, "random_capture_rate": random_rate}

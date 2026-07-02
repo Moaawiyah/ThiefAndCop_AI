@@ -80,14 +80,24 @@ class QPolicy:
         """Drop position-preserving actions while blind, keeping >=1 action.
 
         With the opponent out of vision, any action that leaves the agent on its
-        current cell — ``stay``, ``barrier``, or a move blocked by a wall/barrier —
-        is state-preserving: a greedy agent that picks it idles forever and never
+        current cell — ``stay`` or a move blocked by a wall/barrier — is
+        state-preserving: a greedy agent that picks it idles forever and never
         closes in. Banning them forces real progress; the >=1 fallback keeps the
         mask legal if the agent is genuinely boxed in.
+
+        A ``barrier`` is *not* idle when ``barrier_requires_visible`` is off: it
+        walls off an escape corridor during blind search (and is self-limiting —
+        the cop can't re-barrier its own cell and runs out of barriers), so it is
+        left available in that mode. When the gate requires visibility a blind
+        barrier is already illegal, so it is suppressed as before.
         """
+        allow_blind_barrier = not self.config.qlearning.barrier_requires_visible
         trial = mask.copy()
         for i, a in enumerate(self.qtable.actions):
-            if a == "barrier" or engine.grid.apply_move(obs.self_pos, a) == obs.self_pos:
+            if a == "barrier":
+                if not allow_blind_barrier:
+                    trial[i] = False
+            elif engine.grid.apply_move(obs.self_pos, a) == obs.self_pos:
                 trial[i] = False
         if trial.any():
             mask[:] = trial
