@@ -86,10 +86,10 @@ qlearning:
 
 # --- Reporting (§9) ---
 report:
-  email_target: moaawiyah.haj@icloud.com
+  email_target: rmisegal+uoh26b@gmail.com  # instructor submission address (hw6.md §9)
   timezone: Asia/Jerusalem
-  group_name: "Team-Name"
-  students: []
-  github_repo: ""
+  group_name: "moaamoha"
+  students: ["Moa'awiyah", "Mohamed"]
+  github_repo: "https://github.com/Moaawiyah/ThiefAndCop_AI"
   cop_mcp_url: "https://suse-cabinet-freeze-president.trycloudflare.com/mcp"
   thief_mcp_url: "https://oriented-cdt-overview-richards.trycloudflare.com/mcp"
