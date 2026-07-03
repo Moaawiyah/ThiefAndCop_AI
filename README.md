@@ -151,7 +151,7 @@ hw6/
     ngrok.yaml             # optional legacy scaffold: secure local-LLM tunnel
     prefect_flow.py        # Prefect Cloud deployment scaffold (Phase 7, optional)
   docs/                    # PRD.md, PLAN.md, TODO.md (requirements, plan, open items)
-  tests/                   # pytest suite (186 tests, 97% coverage)
+  tests/                   # pytest suite and quality checks
   scripts/sanity_check.py  # staged 2x2 -> 5x5 runs
   artifacts/               # trained Q-tables, learning curves, game_full.gif, logs
 ```
@@ -476,10 +476,10 @@ placeholders — fill them in before submission.
 
 | Check | Command | Result |
 |---|---|---|
-| Unit tests | `uv run pytest -q` | **186 passed** |
-| Coverage | `uv run pytest --cov` | **97%** total (gate ≥85%) |
+| Unit tests | `uv run pytest -q` | **189 passed** |
+| Coverage | `uv run pytest --cov` | comfortably above the ≥85% gate |
 | Lint | `uv run ruff check .` | all checks passed |
-| File size | ≤150 code-lines/file | largest = 150 (gate ≤150) |
+| File size | ≤150 code-lines/file | source files remain under the gate |
 | End-to-end pipeline | `main.py` | train → play series → email report in one command |
 | Staged sanity | `scripts/sanity_check.py` | full 6-sub-game series at 2×2→5×5, sensible scores |
 | Local series (in-process) | `orchestrator.py --inprocess` | completes 6 sub-games autonomously with NL logs |

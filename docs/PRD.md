@@ -84,16 +84,16 @@ verified working.
 
 | Gate | Requirement | Current Measured Value | Status |
 |------|-------------|------------------------|--------|
-| Tests pass | All tests green | **147 passing** | ✅ |
+| Tests pass | All tests green | **189 passing** | ✅ |
 | Coverage | ≥ 85% total | **98%** | ✅ |
-| Line limit | ≤ 150 code-lines per file | All ≤ 150 (largest 147; tight files trimmed 150 → 140) | ✅ |
+| Line limit | ≤ 150 code-lines per file | All source files under the limit | ✅ |
 | Lint | `ruff` clean | All checks pass | ✅ |
 | Dependency mgmt | uv-only | `uv run pytest --cov` | ✅ |
 | Secrets | none committed | Dev placeholder token only | ✅ |
 | Config-driven | no hard-coding | Audited: every game parameter sourced from `config.yaml` | ✅ |
 
-> Note: the two previously-tight files (`mcp_servers/tools.py`,
-> `mcp_client/orchestrator_runner.py`) were trimmed from 150 to **140** code-lines for margin.
+> Note: previously-tight source files were split or trimmed to preserve margin under the
+> line-limit gate.
 > Targeted tests lifted the weakest modules to `reporting/email_report.py` 99%,
 > `core/state.py` 100%, and `gui/visualizer.py` 90%; every source module now clears the 85%
 > bar individually (lowest: `core/config.py`, 89%). A hard-coding audit confirmed all game

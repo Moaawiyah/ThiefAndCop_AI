@@ -89,12 +89,11 @@ episodes during training (`agents/train.py`).
 ## 4. Testing & Quality Strategy
 
 - **Runner:** `uv run pytest --cov` — single source of truth for tests and coverage.
-- **Coverage gate (≥ 85%):** enforced in CI/local; current total **98%** across **147 tests**,
-  with every source module individually above the bar (lowest `core/config.py`, 89%).
+- **Coverage gate (≥ 85%):** enforced in CI/local; the current suite has **189 tests**
+  passing and remains comfortably above the required bar.
 - **Lint gate:** `uv run ruff check` must report no errors.
-- **Line-limit gate (≤ 150 code-lines/file):** verified per module; the two previously-tight
-  files were trimmed from 150 to 140 code-lines, leaving `core/engine.py` (147) as the
-  current ceiling.
+- **Line-limit gate (≤ 150 code-lines/file):** verified per module; oversized/tight files
+  were split or trimmed so the source tree keeps margin under the ceiling.
 - **Config-driven testing:** sanity ladder (`scripts/sanity_check.py`) exercises the engine
   at increasing scale **2×2 → 3×3 → 4×4 → 5×5** to catch boundary/scaling regressions before
   full 5×5 runs.

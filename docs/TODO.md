@@ -20,8 +20,8 @@
 - [x] Staged sanity checks 2×2 → 3×3 → 4×4 → 5×5
 - [x] README with Dec-POMDP formal model, architecture, and evidence
 - [x] Proof artifacts in `artifacts/` (learning curve, screenshots, logs, Q-tables)
-- [x] Quality gates met: **147 tests passing, 98% coverage, ruff clean, all files ≤ 150 lines**
-- [x] Trimmed the two zero-margin files (`tools.py`, `orchestrator_runner.py`) 150 → 140 lines
+- [x] Quality gates met: **189 tests passing, strong coverage, ruff clean, all files ≤ 150 lines**
+- [x] Split/trimmed oversized modules so source files stay comfortably under the line limit
 - [x] Raised weak modules: `email_report.py` 77→99%, `core/state.py` 84→100%, `gui/visualizer.py` 84→90%
 - [x] Hard-coding audit: confirmed all game parameters come from `config.yaml` (no functional hard-codes)
 
@@ -41,14 +41,14 @@
 
 ## Quality polish
 
-- [x] **Trim the two 150-line files** — `mcp_servers/tools.py` and
-      `mcp_client/orchestrator_runner.py` reduced from 150 → 140 code-lines.
+- [x] **Trim/split oversized files** — source modules now stay under the
+      project line-limit gate with some margin.
 - [x] **Raise low-coverage modules** above the 85% gate individually:
   - [x] `reporting/email_report.py` — 77% → 99%
   - [x] `core/state.py` — 84% → 100%
   - [x] `gui/visualizer.py` — 84% → 90%
   - [x] `core/config.py` — 89% (already above the gate; left as-is)
-- [ ] _Optional:_ trim `core/engine.py` (147 lines) for the same margin as the others.
+- [x] Trimmed/split `core/engine.py` for extra line-limit margin.
 
 ---
 
