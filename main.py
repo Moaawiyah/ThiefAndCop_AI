@@ -7,12 +7,13 @@ Runs the three phases in order, reusing the existing entry points:
   2. **Orchestrate** — the MCP client plays a 6-sub-game series with the freshly
      trained policies (:func:`orchestrator.run`); writes the game log + GIF.
   3. **Report** — build the JSON-only Internal Game Report and email it via the
-     Gmail API (:func:`reporting.email_report`). Dry-run by default.
+     Gmail API (:func:`reporting.email_report`). The email is **sent by default**;
+     pass ``--dry-run`` to only print the report instead.
 
 Usage:
-    python3 main.py                       # train + orchestrate + email (dry-run)
+    python3 main.py                       # train + orchestrate + SEND email
     python3 main.py --episodes 2000       # quick smoke run
-    python3 main.py --send                # actually deliver the email
+    python3 main.py --dry-run             # build+print the report, do NOT send
     python3 main.py --skip-train          # reuse existing Q-tables
     python3 main.py --skip-orchestrate    # no live series (email uses sample data)
 """
@@ -83,7 +84,8 @@ def main() -> None:
     p.add_argument("--episodes", type=int, default=None,
                    help="override config.qlearning.episodes")
     p.add_argument("--seed", type=int, default=0)
-    p.add_argument("--send", action="store_true", help="actually send the email (Gmail API)")
+    p.add_argument("--dry-run", action="store_true",
+                   help="build+print the report but do NOT send it (default: send)")
     p.add_argument("--networked", action="store_true",
                    help="orchestrate over the live FastMCP servers (default: in-process)")
     p.add_argument("--no-gif", action="store_true", help="skip writing artifacts/game_full.gif")
@@ -103,7 +105,7 @@ def main() -> None:
         summary = phase_orchestrate(args.networked, not args.no_gif, verbose=not args.quiet)
     if not args.skip_email:
         results = summary["results"] if summary else None
-        phase_email(config, results, args.send)
+        phase_email(config, results, send=not args.dry_run)
 
 
 if __name__ == "__main__":
